@@ -53,6 +53,9 @@ SCORE_HIT = 5.0
 SCORE_COLLISION = -2.5
 COLLISION_COOLDOWN_SEC = 0.5
 
+# Decimal places for rate fields written to CSV (e.g., score_per_ms)
+RATE_DECIMALS = 10
+
 START_LENGTH = 5
 
 INSTRUCTION_KEY = "e"

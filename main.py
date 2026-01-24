@@ -3,7 +3,7 @@ from datetime import datetime
 
 from psychopy import core, gui, visual
 
-from config import BACKGROUND_COLOR
+from config import BACKGROUND_COLOR, RATE_DECIMALS
 from snake_task.game import run_stage
 from snake_task.logging import append_blank_row, append_log
 from snake_task.stages import STAGES
@@ -11,7 +11,9 @@ from snake_task.ui import show_instructions, show_stage_screen
 
 
 def main():
-	session_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+	now = datetime.now()
+	hour_12 = now.hour % 12 or 12
+	session_datetime = f"{now.month}/{now.day}/{now.year}  {hour_12}:{now:%M:%S} {now:%p}"
 	info = {
 		"Participant ID": "",
 	}
@@ -41,6 +43,11 @@ def main():
 			"participant_id": participant_id,
 			"session_datetime": session_datetime,
 			"difficulty": stage.name,
+			"score_per_ms": (
+				f"{(result['score'] / (stage.duration_sec * 1000.0)):.{RATE_DECIMALS}f}"
+				if stage.duration_sec
+				else ""
+			),
 			**result,
 		}
 		append_log(data_path, row)
