@@ -7,7 +7,7 @@ from config import BACKGROUND_COLOR, WINDOW_SIZE
 from snake_task.game import run_stage
 from snake_task.logging import append_blank_row, append_log
 from snake_task.stages import STAGES
-from snake_task.ui import show_instructions
+from snake_task.ui import show_instructions, show_stage_screen
 
 
 def main():
@@ -15,7 +15,7 @@ def main():
 	info = {
 		"Participant ID": "",
 	}
-	dialog = gui.DlgFromDict(info, title="Snake Task")
+	dialog = gui.DlgFromDict(info, title="Snake")
 	if not dialog.OK:
 		return
 
@@ -31,6 +31,8 @@ def main():
 
 	completed_any = False
 	for stage in STAGES:
+		if show_stage_screen(win, f"{stage.name}..") == "quit":
+			break
 		status, result = run_stage(win, stage)
 		if status == "quit":
 			break

@@ -68,6 +68,34 @@ def show_instructions(win, instruction_text=None):
 		core.wait(0.01)
 
 
+def show_stage_screen(win, title_text):
+	header = visual.TextStim(
+		win,
+		text=title_text,
+		height=36,
+		color="white",
+		pos=(0, 40),
+	)
+	footer = visual.TextStim(
+		win,
+		text=f"Press {INSTRUCTION_KEY.upper()} to start",
+		height=22,
+		color="white",
+		pos=(0, -260),
+	)
+
+	while True:
+		keys = event.getKeys()
+		if EXIT_KEY in keys:
+			return "quit"
+		if INSTRUCTION_KEY in keys:
+			return "continue"
+		header.draw()
+		footer.draw()
+		win.flip()
+		core.wait(0.01)
+
+
 def create_hud(win, hud_height):
 	width, height = win.size
 	base_y = -height / 2 + hud_height / 2
