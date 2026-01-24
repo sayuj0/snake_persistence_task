@@ -29,7 +29,6 @@ def _float_or_none(value):
 
 
 def _migrate_log_file(path):
-	# If the CSV exists but has an older header, rewrite it with the new header.
 	with open(path, "r", newline="", encoding="utf-8") as handle:
 		reader = csv.reader(handle)
 		existing_header = next(reader, None)
@@ -47,7 +46,6 @@ def _migrate_log_file(path):
 		writer = csv.DictWriter(handle, fieldnames=FIELDNAMES)
 		writer.writeheader()
 		for row in rows:
-			# Preserve blank rows (DictReader won't return them)
 			out = {name: row.get(name, "") for name in FIELDNAMES}
 			if out.get("score_per_ms", "") in ("", None):
 				score = _float_or_none(out.get("score"))

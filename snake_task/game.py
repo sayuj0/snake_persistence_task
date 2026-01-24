@@ -9,8 +9,15 @@ from config import (
 	GRID_SIZE,
 	HUD_HEIGHT,
 	HUD_LINE_COLOR,
+	PRE_STAGE_FIXATION_COLOR,
+	PRE_STAGE_FIXATION_FLASH_SEC,
+	PRE_STAGE_FIXATION_OPACITY,
+	PRE_STAGE_FIXATION_SIZE_PX,
+	PRE_STAGE_FIXATION_THICKNESS_PX,
+	PRE_STAGE_FIXATION_TOTAL_SEC,
 	SCORE_COLLISION,
 	SCORE_HIT,
+	SHOW_PRE_STAGE_FIXATION,
 	START_LENGTH,
 	SPRITE_APPLE,
 	SPRITE_BODY_CORNER,
@@ -103,6 +110,40 @@ def run_stage(win, stage):
 		lineColor=HUD_LINE_COLOR,
 		lineWidth=2,
 	)
+
+	if SHOW_PRE_STAGE_FIXATION and PRE_STAGE_FIXATION_TOTAL_SEC > 0:
+		fix_h = visual.Line(
+			win,
+			start=(-PRE_STAGE_FIXATION_SIZE_PX, 0),
+			end=(PRE_STAGE_FIXATION_SIZE_PX, 0),
+			lineColor=PRE_STAGE_FIXATION_COLOR,
+			opacity=float(PRE_STAGE_FIXATION_OPACITY),
+			lineWidth=float(PRE_STAGE_FIXATION_THICKNESS_PX),
+		)
+		fix_v = visual.Line(
+			win,
+			start=(0, -PRE_STAGE_FIXATION_SIZE_PX),
+			end=(0, PRE_STAGE_FIXATION_SIZE_PX),
+			lineColor=PRE_STAGE_FIXATION_COLOR,
+			opacity=float(PRE_STAGE_FIXATION_OPACITY),
+			lineWidth=float(PRE_STAGE_FIXATION_THICKNESS_PX),
+		)
+		pre_clock = core.Clock()
+		while pre_clock.getTime() < float(PRE_STAGE_FIXATION_TOTAL_SEC):
+			keys = event.getKeys()
+			if EXIT_KEY in keys:
+				return "quit", None
+			t = pre_clock.getTime()
+			if float(PRE_STAGE_FIXATION_FLASH_SEC) <= 0:
+				visible = True
+			else:
+				visible = int(t / float(PRE_STAGE_FIXATION_FLASH_SEC)) % 2 == 0
+			if visible:
+				fix_h.draw()
+				fix_v.draw()
+			win.flip()
+			core.wait(0.005)
+
 	clock = core.Clock()
 
 	while clock.getTime() < stage.duration_sec:

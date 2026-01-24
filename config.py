@@ -16,12 +16,9 @@ HUD_LINE_COLOR = "white"
 
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 
-# Sprite rendering
-# Set to False to use the original colored rectangles.
 USE_SPRITES = True
 SPRITES_DIR = os.path.join(PROJECT_ROOT, "images")
 
-# Filenames inside SPRITES_DIR
 SPRITE_APPLE = "apple.png"
 SPRITE_HEAD = {
 	"up": "head_up.png",
@@ -46,30 +43,29 @@ SPRITE_BODY_CORNER = {
 	"bottomright": "body_bottomright.png",
 }
 
-# Visual-only scale for the apple sprite/rect relative to GRID_SIZE.
 APPLE_SCALE = 1.5
 
-# HUD panel image (drawn behind the HUD widgets)
 USE_HUD_PANEL = True
 HUD_PANEL_IMAGE = "button_square_wide.png"
-# Panel width as a fraction of the window width.
-# Use ~1.0 for full-width; slightly >1.0 helps reach the screen edges
-# if the PNG has transparent padding.
 HUD_PANEL_WIDTH_REL = 1.02
-# Panel height in pixels (visual only). If None, uses HUD_HEIGHT.
 HUD_PANEL_HEIGHT = None
-# Vertical offset (pixels) for the panel center within the HUD strip.
 HUD_PANEL_Y_OFFSET = 0
 
 SCORE_HIT = 5.0
 SCORE_COLLISION = -2.5
 COLLISION_COOLDOWN_SEC = 0.5
 
-# Decimal places for rate fields written to CSV (e.g., score_per_ms)
+SHOW_PRE_STAGE_FIXATION = True
+PRE_STAGE_FIXATION_TOTAL_SEC = 2.0
+PRE_STAGE_FIXATION_FLASH_SEC = 0.25
+PRE_STAGE_FIXATION_SIZE_PX = 36
+PRE_STAGE_FIXATION_THICKNESS_PX = 3
+PRE_STAGE_FIXATION_OPACITY = 1.0
+PRE_STAGE_FIXATION_COLOR = "white"
+
 RATE_DECIMALS = 10
 
 START_LENGTH = 5
 
 INSTRUCTION_KEY = "e"
 EXIT_KEY = "escape"
-

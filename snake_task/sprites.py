@@ -80,7 +80,6 @@ def _grid_dir_from_delta(dx: float, dy: float, grid_size: int) -> Optional[str]:
 
 
 def head_direction(snake, grid_size: int) -> str:
-	# Direction the head is facing: from neck -> head
 	if len(snake) < 2:
 		return "right"
 	head_x, head_y = snake[0]
@@ -91,7 +90,6 @@ def head_direction(snake, grid_size: int) -> str:
 
 
 def tail_direction(snake, grid_size: int) -> str:
-	# Direction the tail is pointing: from pre-tail -> tail
 	if len(snake) < 2:
 		return "left"
 	tail_x, tail_y = snake[-1]
@@ -102,7 +100,6 @@ def tail_direction(snake, grid_size: int) -> str:
 
 
 def body_sprite_key(prev_pos, curr_pos, next_pos, grid_size: int) -> str:
-	# Determine if the body segment is straight or a corner.
 	px, py = prev_pos
 	cx, cy = curr_pos
 	nx, ny = next_pos
@@ -110,7 +107,6 @@ def body_sprite_key(prev_pos, curr_pos, next_pos, grid_size: int) -> str:
 	d1 = _grid_dir_from_delta(px - cx, py - cy, grid_size)
 	d2 = _grid_dir_from_delta(nx - cx, ny - cy, grid_size)
 	if not d1 or not d2:
-		# Fallback to a reasonable default
 		return "horizontal"
 
 	if (d1 in ("left", "right")) and (d2 in ("left", "right")):
