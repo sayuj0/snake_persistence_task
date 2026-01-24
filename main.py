@@ -3,7 +3,7 @@ from datetime import datetime
 
 from psychopy import core, gui, visual
 
-from config import BACKGROUND_COLOR, WINDOW_SIZE
+from config import BACKGROUND_COLOR
 from snake_task.game import run_stage
 from snake_task.logging import append_blank_row, append_log
 from snake_task.stages import STAGES
@@ -21,7 +21,7 @@ def main():
 
 	participant_id = info["Participant ID"].strip() or "unknown"
 
-	win = visual.Window(size=WINDOW_SIZE, color=BACKGROUND_COLOR, units="pix", fullscr=True)
+	win = visual.Window(color=BACKGROUND_COLOR, units="pix", fullscr=True)
 
 	if show_instructions(win) == "quit":
 		win.close()

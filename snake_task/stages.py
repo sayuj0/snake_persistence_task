@@ -16,7 +16,7 @@ STAGES = [
 	),
 	StageConfig(
 		name="Level 2",
-		duration_sec=5.0,
+		duration_sec=200.0,
 		speed_cells_per_sec=14.0,
 		no_hit_respawn_sec=30.0,
 	),

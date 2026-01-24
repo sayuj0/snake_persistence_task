@@ -3,6 +3,7 @@ import math
 from psychopy import core, event, visual
 
 from config import (
+	APPLE_SCALE,
 	COLLISION_COOLDOWN_SEC,
 	EXIT_KEY,
 	GRID_SIZE,
@@ -11,9 +12,23 @@ from config import (
 	SCORE_COLLISION,
 	SCORE_HIT,
 	START_LENGTH,
+	SPRITE_APPLE,
+	SPRITE_BODY_CORNER,
+	SPRITE_BODY_STRAIGHT,
+	SPRITE_HEAD,
+	SPRITE_TAIL,
+	SPRITES_DIR,
+	USE_SPRITES,
 )
 from snake_task.utils import get_random_grid_position
 from snake_task.ui import create_hud, update_hud, update_progress_bar
+from snake_task.sprites import (
+	SpriteConfig,
+	SpriteManager,
+	body_sprite_key,
+	head_direction,
+	tail_direction,
+)
 
 
 def run_stage(win, stage):
@@ -56,7 +71,27 @@ def run_stage(win, stage):
 
 	snake_rect = visual.Rect(win, width=GRID_SIZE, height=GRID_SIZE, fillColor="green", lineColor="green")
 	head_rect = visual.Rect(win, width=GRID_SIZE, height=GRID_SIZE, fillColor="lightgreen", lineColor="lightgreen")
-	target_rect = visual.Rect(win, width=GRID_SIZE, height=GRID_SIZE, fillColor="red", lineColor="red")
+	target_rect = visual.Rect(
+		win,
+		width=GRID_SIZE * APPLE_SCALE,
+		height=GRID_SIZE * APPLE_SCALE,
+		fillColor="red",
+		lineColor="red",
+	)
+
+	sprite_manager = SpriteManager(
+		win,
+		SpriteConfig(
+			use_sprites=USE_SPRITES,
+			sprites_dir=SPRITES_DIR,
+			grid_size=GRID_SIZE,
+			apple=SPRITE_APPLE,
+			head=SPRITE_HEAD,
+			tail=SPRITE_TAIL,
+			body_straight=SPRITE_BODY_STRAIGHT,
+			body_corner=SPRITE_BODY_CORNER,
+		),
+	)
 
 	score_text, time_text, hit_text, bar_bg, bar_fill = create_hud(win, HUD_HEIGHT)
 
@@ -129,16 +164,29 @@ def run_stage(win, stage):
 		time_text.draw()
 		hit_text.draw()
 
-		target_rect.pos = target_pos
-		target_rect.draw()
+		if not sprite_manager.draw(SPRITE_APPLE, target_pos, scale=APPLE_SCALE):
+			target_rect.pos = target_pos
+			target_rect.draw()
 
 		for idx, segment in enumerate(snake):
 			if idx == 0:
-				head_rect.pos = segment
-				head_rect.draw()
+				dir_key = head_direction(snake, GRID_SIZE)
+				head_file = SPRITE_HEAD.get(dir_key)
+				if not (head_file and sprite_manager.draw(head_file, segment)):
+					head_rect.pos = segment
+					head_rect.draw()
+			elif idx == len(snake) - 1:
+				dir_key = tail_direction(snake, GRID_SIZE)
+				tail_file = SPRITE_TAIL.get(dir_key)
+				if not (tail_file and sprite_manager.draw(tail_file, segment)):
+					snake_rect.pos = segment
+					snake_rect.draw()
 			else:
-				snake_rect.pos = segment
-				snake_rect.draw()
+				key = body_sprite_key(snake[idx - 1], snake[idx], snake[idx + 1], GRID_SIZE)
+				body_file = SPRITE_BODY_STRAIGHT.get(key) or SPRITE_BODY_CORNER.get(key)
+				if not (body_file and sprite_manager.draw(body_file, segment)):
+					snake_rect.pos = segment
+					snake_rect.draw()
 
 		win.flip()
 		core.wait(0.005)
