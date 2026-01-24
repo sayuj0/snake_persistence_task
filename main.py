@@ -10,13 +10,6 @@ from snake_task.stages import STAGES
 from snake_task.ui import show_instructions
 
 
-def load_instructions(path):
-	if not os.path.exists(path):
-		return "Instructions will be added here."
-	with open(path, "r", encoding="utf-8") as handle:
-		return handle.read().strip()
-
-
 def main():
 	session_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 	info = {
@@ -32,8 +25,7 @@ def main():
 
 	win = visual.Window(size=WINDOW_SIZE, color=BACKGROUND_COLOR, units="pix")
 
-	instructions = load_instructions("instructions.txt")
-	if show_instructions(win, instructions) == "quit":
+	if show_instructions(win) == "quit":
 		win.close()
 		return
 

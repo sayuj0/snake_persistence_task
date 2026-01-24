@@ -3,7 +3,34 @@ from psychopy import visual, event, core
 from config import INSTRUCTION_KEY, EXIT_KEY
 
 
-def show_instructions(win, instruction_text):
+DEFAULT_INSTRUCTIONS = (
+	"Use the arrow keys to move the snake.\n"
+	"Collect red targets to gain points.\n"
+	"Colliding with walls or yourself reduces points.\n\n"
+	"Your score updates in real time."
+)
+
+
+def _clean_instruction_text(text):
+	lines = []
+	for raw_line in text.splitlines():
+		line = raw_line.strip()
+		lower = line.lower()
+		if not line:
+			lines.append("")
+			continue
+		if lower == "instructions":
+			continue
+		if "press" in lower and INSTRUCTION_KEY in lower:
+			continue
+		lines.append(raw_line)
+	return "\n".join(lines).strip()
+
+
+def show_instructions(win, instruction_text=None):
+	if not instruction_text:
+		instruction_text = DEFAULT_INSTRUCTIONS
+	instruction_text = _clean_instruction_text(instruction_text)
 	header = visual.TextStim(
 		win,
 		text="Instructions",
@@ -34,7 +61,6 @@ def show_instructions(win, instruction_text):
 			return "quit"
 		if INSTRUCTION_KEY in keys:
 			return "continue"
-		win.flip(clearBuffer=True)
 		header.draw()
 		body.draw()
 		footer.draw()
@@ -42,13 +68,48 @@ def show_instructions(win, instruction_text):
 		core.wait(0.01)
 
 
-def create_hud(win):
-	score_text = visual.TextStim(win, text="Score: 0", height=20, color="white", pos=(-350, 310))
-	time_text = visual.TextStim(win, text="Time: 0.0s", height=20, color="white", pos=(0, 310))
-	hit_text = visual.TextStim(win, text="Targets: 0", height=20, color="white", pos=(350, 310))
+def create_hud(win, hud_height):
+	width, height = win.size
+	base_y = -height / 2 + hud_height / 2
 
-	bar_bg = visual.Rect(win, width=760, height=12, pos=(0, 280), fillColor="gray", lineColor="gray")
-	bar_fill = visual.Rect(win, width=0, height=12, pos=(-380, 280), fillColor="white", lineColor="white")
+	score_text = visual.TextStim(
+		win,
+		text="Score: 0",
+		height=20,
+		color="white",
+		pos=(-width * 0.35, base_y + 10),
+	)
+	time_text = visual.TextStim(
+		win,
+		text="Time: 0.0s",
+		height=20,
+		color="white",
+		pos=(0, base_y + 10),
+	)
+	hit_text = visual.TextStim(
+		win,
+		text="Targets: 0",
+		height=20,
+		color="white",
+		pos=(width * 0.35, base_y + 10),
+	)
+
+	bar_bg = visual.Rect(
+		win,
+		width=width * 0.85,
+		height=12,
+		pos=(0, base_y - 20),
+		fillColor="gray",
+		lineColor="gray",
+	)
+	bar_fill = visual.Rect(
+		win,
+		width=0,
+		height=12,
+		pos=(-bar_bg.width / 2, base_y - 20),
+		fillColor="white",
+		lineColor="white",
+	)
 	return score_text, time_text, hit_text, bar_bg, bar_fill
 
 

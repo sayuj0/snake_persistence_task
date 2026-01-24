@@ -1,9 +1,13 @@
+import math
+
 from psychopy import core, event, visual
 
 from config import (
 	COLLISION_COOLDOWN_SEC,
 	EXIT_KEY,
 	GRID_SIZE,
+	HUD_HEIGHT,
+	HUD_LINE_COLOR,
 	SCORE_COLLISION,
 	SCORE_HIT,
 	START_LENGTH,
@@ -16,8 +20,13 @@ def run_stage(win, stage):
 	width, height = win.size
 	min_x = -width // 2 + GRID_SIZE // 2
 	max_x = width // 2 - GRID_SIZE // 2
-	min_y = -height // 2 + GRID_SIZE // 2
+	min_y = -height // 2 + HUD_HEIGHT + GRID_SIZE // 2
 	max_y = height // 2 - GRID_SIZE // 2
+
+	min_x = math.ceil(min_x / GRID_SIZE) * GRID_SIZE
+	max_x = math.floor(max_x / GRID_SIZE) * GRID_SIZE
+	min_y = math.ceil(min_y / GRID_SIZE) * GRID_SIZE
+	max_y = math.floor(max_y / GRID_SIZE) * GRID_SIZE
 	bounds = (min_x, max_x, min_y, max_y)
 
 	snake = [(0, 0)]
@@ -49,7 +58,16 @@ def run_stage(win, stage):
 	head_rect = visual.Rect(win, width=GRID_SIZE, height=GRID_SIZE, fillColor="lightgreen", lineColor="lightgreen")
 	target_rect = visual.Rect(win, width=GRID_SIZE, height=GRID_SIZE, fillColor="red", lineColor="red")
 
-	score_text, time_text, hit_text, bar_bg, bar_fill = create_hud(win)
+	score_text, time_text, hit_text, bar_bg, bar_fill = create_hud(win, HUD_HEIGHT)
+
+	hud_boundary_y = min_y - GRID_SIZE / 2
+	hud_line = visual.Line(
+		win,
+		start=(min_x, hud_boundary_y),
+		end=(max_x, hud_boundary_y),
+		lineColor=HUD_LINE_COLOR,
+		lineWidth=2,
+	)
 	clock = core.Clock()
 
 	while clock.getTime() < stage.duration_sec:
@@ -101,8 +119,9 @@ def run_stage(win, stage):
 			last_spawn = now
 
 		update_hud(score_text, time_text, hit_text, score, now, target_hit)
-		update_progress_bar(bar_fill, now, stage.duration_sec)
+		update_progress_bar(bar_fill, now, stage.duration_sec, bar_bg.width)
 
+		hud_line.draw()
 		bar_bg.draw()
 		bar_fill.draw()
 		score_text.draw()

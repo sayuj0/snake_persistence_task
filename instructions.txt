@@ -1,7 +1,0 @@
-INSTRUCTIONS PLACEHOLDER
-
-Use the arrow keys to move the snake.
-Collect red targets to gain points.
-Colliding with walls or yourself reduces points.
-
-Press E to begin.
