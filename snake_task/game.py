@@ -93,7 +93,7 @@ def run_stage(win, stage):
 		),
 	)
 
-	score_text, time_text, hit_text, bar_bg, bar_fill = create_hud(win, HUD_HEIGHT)
+	hud_panel, score_text, time_text, hit_text, bar_bg, bar_fill = create_hud(win, HUD_HEIGHT)
 
 	hud_boundary_y = min_y - GRID_SIZE / 2
 	hud_line = visual.Line(
@@ -157,7 +157,10 @@ def run_stage(win, stage):
 		update_hud(score_text, time_text, hit_text, score, now, target_hit)
 		update_progress_bar(bar_fill, now, stage.duration_sec, bar_bg.width)
 
-		hud_line.draw()
+		if hud_panel is None:
+			hud_line.draw()
+		else:
+			hud_panel.draw()
 		bar_bg.draw()
 		bar_fill.draw()
 		score_text.draw()

@@ -1,6 +1,18 @@
+import os
+
 from psychopy import visual, event, core
 
-from config import INSTRUCTION_KEY, EXIT_KEY
+from config import (
+	EXIT_KEY,
+	HUD_HEIGHT,
+	HUD_PANEL_HEIGHT,
+	HUD_PANEL_IMAGE,
+	HUD_PANEL_WIDTH_REL,
+	HUD_PANEL_Y_OFFSET,
+	INSTRUCTION_KEY,
+	SPRITES_DIR,
+	USE_HUD_PANEL,
+)
 
 
 DEFAULT_INSTRUCTIONS = (
@@ -100,31 +112,55 @@ def create_hud(win, hud_height):
 	width, height = win.size
 	base_y = -height / 2 + hud_height / 2
 
+	hud_panel = None
+	panel_w = width
+	panel_h = hud_height
+	if USE_HUD_PANEL and HUD_PANEL_IMAGE:
+		panel_path = os.path.join(SPRITES_DIR, HUD_PANEL_IMAGE)
+		if os.path.exists(panel_path):
+			panel_w = width * float(HUD_PANEL_WIDTH_REL)
+			# Nudge to avoid 1px seams at the edges on some displays.
+			if panel_w >= width:
+				panel_w = panel_w + 2
+			panel_h = float(HUD_PANEL_HEIGHT) if HUD_PANEL_HEIGHT else float(HUD_HEIGHT)
+			hud_panel = visual.ImageStim(
+				win,
+				image=panel_path,
+				size=(panel_w, panel_h),
+				pos=(0, base_y + HUD_PANEL_Y_OFFSET),
+			)
+
+	# Position widgets relative to the panel width so they sit inside the border.
+	x_left = -panel_w * 0.35
+	x_mid = 0
+	x_right = panel_w * 0.35
+
 	score_text = visual.TextStim(
 		win,
 		text="Score: 0",
 		height=20,
 		color="white",
-		pos=(-width * 0.35, base_y + 10),
+		pos=(x_left, base_y + 10),
 	)
 	time_text = visual.TextStim(
 		win,
 		text="Time: 0.0s",
 		height=20,
 		color="white",
-		pos=(0, base_y + 10),
+		pos=(x_mid, base_y + 10),
 	)
 	hit_text = visual.TextStim(
 		win,
 		text="Targets: 0",
 		height=20,
 		color="white",
-		pos=(width * 0.35, base_y + 10),
+		pos=(x_right, base_y + 10),
 	)
 
+	bar_width = panel_w * 0.85
 	bar_bg = visual.Rect(
 		win,
-		width=width * 0.85,
+		width=bar_width,
 		height=16,
 		pos=(0, base_y - 20),
 		fillColor="gray",
@@ -139,7 +175,7 @@ def create_hud(win, hud_height):
 		fillColor="white",
 		lineColor=None,
 	)
-	return score_text, time_text, hit_text, bar_bg, bar_fill
+	return hud_panel, score_text, time_text, hit_text, bar_bg, bar_fill
 
 
 def update_hud(score_text, time_text, hit_text, score, elapsed, target_hit):
