@@ -1,0 +1,66 @@
+import os
+from datetime import datetime
+
+from psychopy import core, gui, visual
+
+from config import BACKGROUND_COLOR, WINDOW_SIZE
+from snake_task.game import run_stage
+from snake_task.logging import append_blank_row, append_log
+from snake_task.stages import STAGES
+from snake_task.ui import show_instructions
+
+
+def load_instructions(path):
+	if not os.path.exists(path):
+		return "Instructions will be added here."
+	with open(path, "r", encoding="utf-8") as handle:
+		return handle.read().strip()
+
+
+def main():
+	session_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+	info = {
+		"Participant ID": "",
+		"Session DateTime": session_datetime,
+	}
+	dialog = gui.DlgFromDict(info, title="Snake Task")
+	if not dialog.OK:
+		return
+
+	participant_id = info["Participant ID"].strip() or "unknown"
+	session_datetime = info["Session DateTime"].strip() or session_datetime
+
+	win = visual.Window(size=WINDOW_SIZE, color=BACKGROUND_COLOR, units="pix")
+
+	instructions = load_instructions("instructions.txt")
+	if show_instructions(win, instructions) == "quit":
+		win.close()
+		return
+
+	data_path = os.path.join("data", "snake_data.csv")
+
+	completed_any = False
+	for stage in STAGES:
+		status, result = run_stage(win, stage)
+		if status == "quit":
+			break
+
+		row = {
+			"participant_id": participant_id,
+			"session_datetime": session_datetime,
+			"difficulty": stage.name,
+			**result,
+		}
+		append_log(data_path, row)
+		completed_any = True
+
+	if completed_any:
+		append_blank_row(data_path)
+
+	win.close()
+	core.quit()
+
+
+if __name__ == "__main__":
+	main()
+
