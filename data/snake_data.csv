@@ -1,1 +1,1 @@
-participant_id,session_datetime,difficulty,snake_length,score,survival_time,target_hit,collisions
+participant_id,session_datetime,difficulty,snake_length,score,score_per_ms,survival_time,target_hit,collisions
