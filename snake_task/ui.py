@@ -125,10 +125,11 @@ def create_hud(win, hud_height):
 	bar_bg = visual.Rect(
 		win,
 		width=width * 0.85,
-		height=12,
+		height=16,
 		pos=(0, base_y - 20),
 		fillColor="gray",
-		lineColor="gray",
+		lineColor="white",
+		lineWidth=2,
 	)
 	bar_fill = visual.Rect(
 		win,
@@ -136,7 +137,7 @@ def create_hud(win, hud_height):
 		height=12,
 		pos=(-bar_bg.width / 2, base_y - 20),
 		fillColor="white",
-		lineColor="white",
+		lineColor=None,
 	)
 	return score_text, time_text, hit_text, bar_bg, bar_fill
 

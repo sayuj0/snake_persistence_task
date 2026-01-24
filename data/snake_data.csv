@@ -1,1 +1,4 @@
 participant_id,session_datetime,difficulty,snake_length,score,score_per_ms,survival_time,target_hit,collisions
+2,1/23/2026  10:19:50 PM,Trial Run,5,0.0,0.0000000000,5.0,0,0
+2,1/23/2026  10:19:50 PM,Level 1,5,-2.5,-0.0005000000,5.0,0,1
+
