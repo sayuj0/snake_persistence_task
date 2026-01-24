@@ -11,3 +11,6 @@ participant_id,session_datetime,difficulty,snake_length,score,survival_time,targ
 0,2026-01-23 19:32:57,trial,6,5.0,5.0,1,0
 0,2026-01-23 19:32:57,easy,6,5.0,5,1,0
 
+1,2026-01-23 19:39:21,trial,6,5.0,5.0,1,0
+1,2026-01-23 19:39:21,easy,7,10.0,5,2,0
+

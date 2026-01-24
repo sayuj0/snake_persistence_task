@@ -48,9 +48,9 @@ def run_stage(win, stage):
 
 	target_pos = get_random_grid_position(bounds, GRID_SIZE, set(snake))
 
-	def reset_snake():
+	def reset_snake(length=START_LENGTH):
 		new_snake = [(0, 0)]
-		for i in range(1, START_LENGTH):
+		for i in range(1, length):
 			new_snake.append((-i * GRID_SIZE, 0))
 		return new_snake, (GRID_SIZE, 0)
 
@@ -99,7 +99,8 @@ def run_stage(win, stage):
 					collisions += 1
 					score += SCORE_COLLISION
 					collision_lockout = now + COLLISION_COOLDOWN_SEC
-					snake, direction = reset_snake()
+					new_length = max(START_LENGTH, len(snake) - 3)
+					snake, direction = reset_snake(new_length)
 					pending_direction = direction
 			else:
 				snake.insert(0, next_pos)
