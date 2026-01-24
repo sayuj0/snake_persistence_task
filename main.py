@@ -14,14 +14,12 @@ def main():
 	session_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 	info = {
 		"Participant ID": "",
-		"Session DateTime": session_datetime,
 	}
 	dialog = gui.DlgFromDict(info, title="Snake Task")
 	if not dialog.OK:
 		return
 
 	participant_id = info["Participant ID"].strip() or "unknown"
-	session_datetime = info["Session DateTime"].strip() or session_datetime
 
 	win = visual.Window(size=WINDOW_SIZE, color=BACKGROUND_COLOR, units="pix")
 
