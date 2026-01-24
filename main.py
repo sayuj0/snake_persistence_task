@@ -21,7 +21,7 @@ def main():
 
 	participant_id = info["Participant ID"].strip() or "unknown"
 
-	win = visual.Window(size=WINDOW_SIZE, color=BACKGROUND_COLOR, units="pix")
+	win = visual.Window(size=WINDOW_SIZE, color=BACKGROUND_COLOR, units="pix", fullscr=True)
 
 	if show_instructions(win) == "quit":
 		win.close()
@@ -31,7 +31,7 @@ def main():
 
 	completed_any = False
 	for stage in STAGES:
-		if show_stage_screen(win, f"{stage.name}..") == "quit":
+		if show_stage_screen(win, stage.name) == "quit":
 			break
 		status, result = run_stage(win, stage)
 		if status == "quit":
