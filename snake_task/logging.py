@@ -15,7 +15,8 @@ FIELDNAMES: list[str] = [
 	"snake_length",
 	"score",
 	"score_per_ms",
-	"survival_time",
+	"hits_per_ms",
+	"collisions_per_ms",
 	"target_hit",
 	"collisions",
 ]
@@ -51,11 +52,24 @@ def _migrate_log_file(path: str) -> None:
 		writer.writeheader()
 		for row in rows:
 			out = {name: row.get(name, "") for name in FIELDNAMES}
-			if out.get("score_per_ms", "") in ("", None):
-				score = _float_or_none(out.get("score"))
-				survival_time = _float_or_none(out.get("survival_time"))
-				if score is not None and survival_time and survival_time > 0:
-					out["score_per_ms"] = f"{(score / (survival_time * 1000.0)):.{RATE_DECIMALS}f}"
+			denom_sec = _float_or_none(row.get("survival_time"))
+			if denom_sec and denom_sec > 0:
+				denom_ms = denom_sec * 1000.0
+
+				if out.get("score_per_ms", "") in ("", None):
+					score = _float_or_none(row.get("score"))
+					if score is not None:
+						out["score_per_ms"] = f"{(score / denom_ms):.{RATE_DECIMALS}f}"
+
+				if out.get("hits_per_ms", "") in ("", None):
+					hits = _float_or_none(row.get("target_hit"))
+					if hits is not None:
+						out["hits_per_ms"] = f"{(hits / denom_ms):.{RATE_DECIMALS}f}"
+
+				if out.get("collisions_per_ms", "") in ("", None):
+					collisions = _float_or_none(row.get("collisions"))
+					if collisions is not None:
+						out["collisions_per_ms"] = f"{(collisions / denom_ms):.{RATE_DECIMALS}f}"
 			writer.writerow(out)
 
 	os.replace(tmp_path, path)

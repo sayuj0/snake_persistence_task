@@ -14,7 +14,7 @@ from config import BACKGROUND_COLOR, RATE_DECIMALS
 from snake_task.game import run_stage
 from snake_task.logging import append_blank_row, append_log
 from snake_task.stages import STAGES
-from snake_task.ui import show_instructions, show_stage_screen
+from snake_task.ui import show_end_screen, show_instructions, show_stage_screen
 
 
 
@@ -41,21 +41,35 @@ def main() -> None:
 	data_path = os.path.join("data", "snake_data.csv")
 
 	completed_any = False
+	quit_requested = False
 	for stage in STAGES:
 		if show_stage_screen(win, stage.name) == "quit":
+			quit_requested = True
 			break
 		status, result = run_stage(win, stage)
 		if status == "quit":
+			quit_requested = True
 			break
 		assert result is not None
+		denom_ms = stage.duration_sec * 1000.0 if stage.duration_sec else 0.0
 
 		row: dict[str, Any] = {
 			"participant_id": participant_id,
 			"session_datetime": session_datetime,
 			"difficulty": stage.name,
 			"score_per_ms": (
-				f"{(result['score'] / (stage.duration_sec * 1000.0)):.{RATE_DECIMALS}f}"
-				if stage.duration_sec
+				f"{(result['score'] / denom_ms):.{RATE_DECIMALS}f}"
+				if denom_ms
+				else ""
+			),
+			"hits_per_ms": (
+				f"{(result['target_hit'] / denom_ms):.{RATE_DECIMALS}f}"
+				if denom_ms
+				else ""
+			),
+			"collisions_per_ms": (
+				f"{(result['collisions'] / denom_ms):.{RATE_DECIMALS}f}"
+				if denom_ms
 				else ""
 			),
 			**result,
@@ -65,6 +79,12 @@ def main() -> None:
 
 	if completed_any:
 		append_blank_row(data_path)
+
+	if not quit_requested:
+		show_end_screen(
+			win,
+			"Thank you for participating!\n\nPlease let the researcher know you are done.",
+		)
 
 	win.close()
 	core.quit()

@@ -132,6 +132,38 @@ def show_stage_screen(win: Any, title_text: str) -> str:
 		core.wait(0.01)
 
 
+def show_end_screen(win: Any, message: str) -> None:
+	"""Show an end-of-task message until the exit key is pressed.
+
+	Args:
+		win: PsychoPy window used for drawing.
+		message: Message to display.
+	"""
+	text = visual.TextStim(
+		win,
+		text=message,
+		height=36,
+		color="white",
+		wrapWidth=900,
+		alignText="center",
+		pos=(0, 0),
+	)
+
+	# Show the screen and ensure we don't immediately exit due to buffered keys
+	# from the previous screen/stage.
+	text.draw()
+	win.flip()
+	core.wait(0.2)
+	event.clearEvents()
+	while True:
+		keys = event.getKeys()
+		if EXIT_KEY in keys:
+			return
+		text.draw()
+		win.flip()
+		core.wait(0.01)
+
+
 
 def create_hud(win: Any, hud_height: float):
 	"""Create HUD stimuli for a window.

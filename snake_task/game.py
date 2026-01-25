@@ -28,6 +28,8 @@ from config import (
 	SHOW_PRE_STAGE_FIXATION,
 	USE_PLAY_AREA_BOX,
 	START_LENGTH,
+	LENGTH_GAIN_PER_TARGET,
+	LENGTH_LOSS_ON_COLLISION,
 	SPRITE_APPLE,
 	SPRITE_BODY_CORNER,
 	SPRITE_BODY_STRAIGHT,
@@ -68,7 +70,6 @@ def run_stage(win: Any, stage: StageConfig) -> tuple[str, Optional[dict[str, Any
 	avail_max_y = height / 2 - GRID_SIZE / 2
 
 	if USE_PLAY_AREA_BOX:
-		# Fixed-size play area in grid cells (consistent across monitors)
 		max_play_w = max(GRID_SIZE * 6, width - GRID_SIZE)
 		max_play_h = max(GRID_SIZE * 6, (height - HUD_HEIGHT) - GRID_SIZE)
 		play_w = min(float(PLAY_AREA_CELLS_X) * GRID_SIZE, max_play_w)
@@ -112,6 +113,7 @@ def run_stage(win: Any, stage: StageConfig) -> tuple[str, Optional[dict[str, Any
 	last_hit = 0.0
 	collision_lockout = 0.0
 	move_interval = 1.0 / stage.speed_cells_per_sec
+	growth_remaining = 0
 
 	target_pos = get_random_grid_position(bounds, GRID_SIZE, set(snake))
 
@@ -231,19 +233,24 @@ def run_stage(win: Any, stage: StageConfig) -> tuple[str, Optional[dict[str, Any
 					collisions += 1
 					score += SCORE_COLLISION
 					collision_lockout = now + COLLISION_COOLDOWN_SEC
-					new_length = max(START_LENGTH, len(snake) - 3)
+					new_length = max(START_LENGTH, len(snake) - int(LENGTH_LOSS_ON_COLLISION))
 					snake, direction = reset_snake(new_length)
+					growth_remaining = 0
 					pending_direction = direction
 			else:
 				snake.insert(0, next_pos)
 				if next_pos == target_pos:
 					score += SCORE_HIT
 					target_hit += 1
+					growth_remaining += max(0, int(LENGTH_GAIN_PER_TARGET) - 1)
 					last_hit = now
 					target_pos = get_random_grid_position(bounds, GRID_SIZE, set(snake))
 					last_spawn = now
 				else:
-					snake.pop()
+					if growth_remaining > 0:
+						growth_remaining -= 1
+					else:
+						snake.pop()
 
 			last_move = now
 
@@ -297,7 +304,6 @@ def run_stage(win: Any, stage: StageConfig) -> tuple[str, Optional[dict[str, Any
 	result = {
 		"snake_length": len(snake),
 		"score": score,
-		"survival_time": stage.duration_sec,
 		"target_hit": target_hit,
 		"collisions": collisions,
 	}
