@@ -1,4 +1,4 @@
-# Spring follow up 2026 (Slithercraft? Like minecraft but slither 🐍)
+# Snake Persistence Task
 
 This PsychoPy-based Snake task is designed to assess behavioral persistence in relation to Coping Self-Efficacy (CSE). The task provides clear, interpretable feedback so persistence can be measured consistently across participants.
 
