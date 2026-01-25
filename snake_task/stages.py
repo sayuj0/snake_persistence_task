@@ -12,25 +12,25 @@ STAGES: list[StageConfig]
 STAGES = [
 	StageConfig(
 		name="Trial Run",
-		duration_sec=1.0,
+		duration_sec=10.0,
 		speed_cells_per_sec=6.0,
 		no_hit_respawn_sec=15.0,
 	),
 	StageConfig(
 		name="Level 1",
-		duration_sec=5.0,
+		duration_sec=60.0,
 		speed_cells_per_sec=6.0,
 		no_hit_respawn_sec=15.0,
 	),
 	StageConfig(
 		name="Level 2",
-		duration_sec=5.0,
+		duration_sec=60.0,
 		speed_cells_per_sec=20.0,
 		no_hit_respawn_sec=30.0,
 	),
 	StageConfig(
 		name="Level 3",
-		duration_sec=5.0,
+		duration_sec=60.0,
 		speed_cells_per_sec=35.0,
 		no_hit_respawn_sec=45.0,
 	),
