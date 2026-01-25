@@ -36,9 +36,10 @@ Each stage is a `StageConfig(...)` with:
 ### Core gameplay + visuals
 Edit `config.py`.
 
-Common tweaks:
 - `GRID_SIZE`: size of snake segments and movement step (bigger = larger snake/target)
 - `START_LENGTH`: starting snake length
+- `LENGTH_GAIN_PER_TARGET`: how many segments are added per target
+- `LENGTH_LOSS_ON_COLLISION`: how many segments are removed on collision (won’t go below `START_LENGTH`)
 - `SCORE_HIT`, `SCORE_COLLISION`: scoring
 - `COLLISION_COOLDOWN_SEC`: prevents repeated collision penalties too rapidly
 
