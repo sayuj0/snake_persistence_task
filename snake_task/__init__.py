@@ -1,2 +1,4 @@
-# Marker file.
-# This file can be empty.
+"""Snake task package.
+
+Contains the PsychoPy stage loop, UI helpers, sprite helpers, and logging.
+"""

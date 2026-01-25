@@ -1,4 +1,8 @@
+"""Core gameplay loop for each stage."""
+
 import math
+
+from typing import Any, Optional
 
 from psychopy import core, event, visual
 
@@ -32,6 +36,7 @@ from config import (
 	SPRITES_DIR,
 	USE_SPRITES,
 )
+from config import StageConfig
 from snake_task.utils import get_random_grid_position
 from snake_task.ui import create_hud, update_hud, update_progress_bar
 from snake_task.sprites import (
@@ -43,7 +48,19 @@ from snake_task.sprites import (
 )
 
 
-def run_stage(win, stage):
+
+def run_stage(win: Any, stage: StageConfig) -> tuple[str, Optional[dict[str, Any]]]:
+	"""Run a single stage of gameplay.
+
+	Args:
+		win: PsychoPy window used for drawing.
+		stage: Stage configuration (duration, speed, respawn timing).
+
+	Returns:
+		A tuple of (status, result). Status is "quit" if the user exits early,
+		otherwise "complete". Result is None when quitting, otherwise a dict of
+		summary metrics.
+	"""
 	width, height = win.size
 	avail_min_x = -width / 2 + GRID_SIZE / 2
 	avail_max_x = width / 2 - GRID_SIZE / 2
@@ -73,14 +90,13 @@ def run_stage(win, stage):
 	max_y = math.floor(max_y / GRID_SIZE) * GRID_SIZE
 	bounds = (min_x, max_x, min_y, max_y)
 
-	# Choose a safe spawn point inside bounds.
 	spawn_y = math.floor(((min_y + max_y) / 2) / GRID_SIZE) * GRID_SIZE
 	spawn_y = min(max(spawn_y, min_y), max_y)
 	min_head_x = min_x + (START_LENGTH - 1) * GRID_SIZE
 	spawn_x = max(0, min_head_x)
 	spawn_x = min(spawn_x, max_x)
 
-	snake = [(spawn_x, spawn_y)]
+	snake: list[tuple[float, float]] = [(spawn_x, spawn_y)]
 	for i in range(1, START_LENGTH):
 		snake.append((spawn_x - i * GRID_SIZE, spawn_y))
 
@@ -286,4 +302,3 @@ def run_stage(win, stage):
 		"collisions": collisions,
 	}
 	return "complete", result
-

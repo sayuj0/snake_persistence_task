@@ -1,3 +1,8 @@
+"""Central configuration for the Snake task.
+
+Most experiment-tuning happens here.
+"""
+
 import os
 from dataclasses import dataclass
 

@@ -1,4 +1,8 @@
+"""UI helpers (instructions, stage screens, HUD)."""
+
 import os
+
+from typing import Any, Optional
 
 from psychopy import visual, event, core
 
@@ -23,6 +27,7 @@ DEFAULT_INSTRUCTIONS = (
 
 
 def _clean_instruction_text(text):
+	"""Remove duplicate header/footer lines from instruction text."""
 	lines = []
 	for raw_line in text.splitlines():
 		line = raw_line.strip()
@@ -38,7 +43,17 @@ def _clean_instruction_text(text):
 	return "\n".join(lines).strip()
 
 
-def show_instructions(win, instruction_text=None):
+
+def show_instructions(win: Any, instruction_text: Optional[str] = None) -> str:
+	"""Show the instruction screen.
+
+	Args:
+		win: PsychoPy window used for drawing.
+		instruction_text: Optional instruction text override.
+
+	Returns:
+		"continue" when the start key is pressed, or "quit" when the exit key is pressed.
+	"""
 	if not instruction_text:
 		instruction_text = DEFAULT_INSTRUCTIONS
 	instruction_text = _clean_instruction_text(instruction_text)
@@ -79,7 +94,17 @@ def show_instructions(win, instruction_text=None):
 		core.wait(0.01)
 
 
-def show_stage_screen(win, title_text):
+
+def show_stage_screen(win: Any, title_text: str) -> str:
+	"""Show the stage title screen.
+
+	Args:
+		win: PsychoPy window used for drawing.
+		title_text: Title to display (e.g., stage name).
+
+	Returns:
+		"continue" when the start key is pressed, or "quit" when the exit key is pressed.
+	"""
 	header = visual.TextStim(
 		win,
 		text=title_text,
@@ -107,7 +132,18 @@ def show_stage_screen(win, title_text):
 		core.wait(0.01)
 
 
-def create_hud(win, hud_height):
+
+def create_hud(win: Any, hud_height: float):
+	"""Create HUD stimuli for a window.
+
+	Args:
+		win: PsychoPy window used for drawing.
+		hud_height: Height of the HUD region in pixels.
+
+	Returns:
+		A tuple ``(hud_panel, score_text, time_text, hit_text, bar_bg, bar_fill)``.
+		``hud_panel`` may be ``None`` if the panel image is disabled or missing.
+	"""
 	width, height = win.size
 	base_y = -height / 2 + hud_height / 2
 
@@ -118,7 +154,6 @@ def create_hud(win, hud_height):
 		panel_path = os.path.join(SPRITES_DIR, HUD_PANEL_IMAGE)
 		if os.path.exists(panel_path):
 			panel_w = width * float(HUD_PANEL_WIDTH_REL)
-			# Nudge to avoid 1px seams at the edges on some displays.
 			if panel_w >= width:
 				panel_w = panel_w + 2
 			panel_h = float(HUD_PANEL_HEIGHT) if HUD_PANEL_HEIGHT else float(hud_height)
@@ -129,7 +164,6 @@ def create_hud(win, hud_height):
 				pos=(0, base_y + HUD_PANEL_Y_OFFSET),
 			)
 
-	# Position widgets relative to the panel width so they sit inside the border.
 	x_left = -panel_w * 0.35
 	x_mid = 0
 	x_right = panel_w * 0.35
@@ -177,14 +211,33 @@ def create_hud(win, hud_height):
 	return hud_panel, score_text, time_text, hit_text, bar_bg, bar_fill
 
 
-def update_hud(score_text, time_text, hit_text, score, elapsed, target_hit):
+
+def update_hud(score_text: Any, time_text: Any, hit_text: Any, score: float, elapsed: float, target_hit: int) -> None:
+	"""Update HUD text based on current state.
+
+	Args:
+		score_text: Text stimulus for the score label.
+		time_text: Text stimulus for the timer label.
+		hit_text: Text stimulus for the targets-hit label.
+		score: Current score.
+		elapsed: Elapsed time in seconds.
+		target_hit: Number of targets collected.
+	"""
 	score_text.text = f"Score: {score:.1f}"
 	time_text.text = f"Time: {elapsed:.1f}s"
 	hit_text.text = f"Targets: {target_hit}"
 
 
-def update_progress_bar(bar_fill, elapsed, duration, bar_width=760):
+
+def update_progress_bar(bar_fill: Any, elapsed: float, duration: float, bar_width: float = 760) -> None:
+	"""Update the progress bar fill based on elapsed time.
+
+	Args:
+		bar_fill: Rect stimulus representing the fill portion.
+		elapsed: Elapsed time in seconds.
+		duration: Total duration in seconds.
+		bar_width: Total width of the bar background in pixels.
+	"""
 	progress = max(0.0, min(1.0, elapsed / duration))
 	bar_fill.width = bar_width * progress
 	bar_fill.pos = (-bar_width / 2 + bar_fill.width / 2, bar_fill.pos[1])
-

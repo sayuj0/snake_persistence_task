@@ -1,6 +1,8 @@
+"""Sprite selection and drawing helpers for the snake body parts."""
+
 import os
 from dataclasses import dataclass
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Sequence, Tuple
 
 from psychopy import visual
 
@@ -19,6 +21,12 @@ class SpriteConfig:
 
 class SpriteManager:
 	def __init__(self, win, config: SpriteConfig):
+		"""Cache and draw ImageStim sprites by filename.
+
+		Args:
+			win: PsychoPy window used for drawing.
+			config: Sprite configuration (asset filenames and sizing).
+		"""
 		self._win = win
 		self._config = config
 		self._cache: Dict[str, visual.ImageStim] = {}
@@ -27,6 +35,14 @@ class SpriteManager:
 		return os.path.join(self._config.sprites_dir, filename)
 
 	def get(self, filename: str) -> Optional[visual.ImageStim]:
+		"""Get a cached ImageStim for a sprite filename.
+
+		Args:
+			filename: Sprite filename inside ``config.sprites_dir``.
+
+		Returns:
+			The ImageStim if sprites are enabled and the file exists, otherwise ``None``.
+		"""
 		if not self._config.use_sprites:
 			return None
 		if filename in self._cache:
@@ -45,6 +61,16 @@ class SpriteManager:
 		return stim
 
 	def draw(self, filename: str, pos: Tuple[float, float], scale: float = 1.0) -> bool:
+		"""Draw a sprite at a given position.
+
+		Args:
+			filename: Sprite filename.
+			pos: (x, y) position in pixels.
+			scale: Optional scale factor relative to one grid cell.
+
+		Returns:
+			True if the sprite was drawn, False if sprites are disabled or missing.
+		"""
 		stim = self.get(filename)
 		if not stim:
 			return False
@@ -69,7 +95,16 @@ def _grid_dir_from_delta(dx: float, dy: float, grid_size: int) -> Optional[str]:
 	return None
 
 
-def head_direction(snake, grid_size: int) -> str:
+def head_direction(snake: Sequence[Tuple[float, float]], grid_size: int) -> str:
+	"""Infer head direction from the head/neck segment.
+
+	Args:
+		snake: Sequence of (x, y) grid positions (head first).
+		grid_size: Grid cell size in pixels.
+
+	Returns:
+		One of "up", "down", "left", "right".
+	"""
 	if len(snake) < 2:
 		return "right"
 	head_x, head_y = snake[0]
@@ -79,7 +114,16 @@ def head_direction(snake, grid_size: int) -> str:
 	return _grid_dir_from_delta(dx, dy, grid_size) or "right"
 
 
-def tail_direction(snake, grid_size: int) -> str:
+def tail_direction(snake: Sequence[Tuple[float, float]], grid_size: int) -> str:
+	"""Infer tail direction from the tail and the segment before it.
+
+	Args:
+		snake: Sequence of (x, y) grid positions (head first).
+		grid_size: Grid cell size in pixels.
+
+	Returns:
+		One of "up", "down", "left", "right".
+	"""
 	if len(snake) < 2:
 		return "left"
 	tail_x, tail_y = snake[-1]
@@ -89,7 +133,23 @@ def tail_direction(snake, grid_size: int) -> str:
 	return _grid_dir_from_delta(dx, dy, grid_size) or "left"
 
 
-def body_sprite_key(prev_pos, curr_pos, next_pos, grid_size: int) -> str:
+def body_sprite_key(
+	prev_pos: Tuple[float, float],
+	curr_pos: Tuple[float, float],
+	next_pos: Tuple[float, float],
+	grid_size: int,
+) -> str:
+	"""Return the sprite key for a body segment.
+
+	Args:
+		prev_pos: Position of the previous segment.
+		curr_pos: Position of the current segment.
+		next_pos: Position of the next segment.
+		grid_size: Grid cell size in pixels.
+
+	Returns:
+		A key identifying the body sprite shape (straight or corner).
+	"""
 	px, py = prev_pos
 	cx, cy = curr_pos
 	nx, ny = next_pos

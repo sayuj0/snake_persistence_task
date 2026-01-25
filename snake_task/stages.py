@@ -1,4 +1,12 @@
+"""Stage definitions for the Snake task.
+
+Edit this file to change level names, durations, speed, and respawn timing.
+"""
+
 from config import StageConfig
+
+
+STAGES: list[StageConfig]
 
 
 STAGES = [
@@ -27,4 +35,3 @@ STAGES = [
 		no_hit_respawn_sec=45.0,
 	),
 ]
-

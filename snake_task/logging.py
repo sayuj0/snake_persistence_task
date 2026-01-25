@@ -1,10 +1,14 @@
+"""CSV logging utilities for experiment runs."""
+
 import csv
 import os
+
+from typing import Any, Mapping, Optional
 
 from config import RATE_DECIMALS
 
 
-FIELDNAMES = [
+FIELDNAMES: list[str] = [
 	"participant_id",
 	"session_datetime",
 	"difficulty",
@@ -17,7 +21,7 @@ FIELDNAMES = [
 ]
 
 
-def _float_or_none(value):
+def _float_or_none(value: Any) -> Optional[float]:
 	try:
 		if value is None:
 			return None
@@ -28,7 +32,7 @@ def _float_or_none(value):
 		return None
 
 
-def _migrate_log_file(path):
+def _migrate_log_file(path: str) -> None:
 	with open(path, "r", newline="", encoding="utf-8") as handle:
 		reader = csv.reader(handle)
 		existing_header = next(reader, None)
@@ -57,7 +61,12 @@ def _migrate_log_file(path):
 	os.replace(tmp_path, path)
 
 
-def ensure_log_file(path):
+def ensure_log_file(path: str) -> None:
+	"""Ensure the CSV exists and matches the expected header.
+
+	Args:
+		path: CSV file path.
+	"""
 	os.makedirs(os.path.dirname(path), exist_ok=True)
 	if not os.path.exists(path):
 		with open(path, "w", newline="", encoding="utf-8") as handle:
@@ -67,16 +76,26 @@ def ensure_log_file(path):
 	_migrate_log_file(path)
 
 
-def append_log(path, row):
+def append_log(path: str, row: Mapping[str, Any]) -> None:
+	"""Append one row of results to the CSV log.
+
+	Args:
+		path: CSV file path.
+		row: Mapping of field name to value.
+	"""
 	ensure_log_file(path)
 	with open(path, "a", newline="", encoding="utf-8") as handle:
 		writer = csv.DictWriter(handle, fieldnames=FIELDNAMES)
 		writer.writerow(row)
 
 
-def append_blank_row(path):
+def append_blank_row(path: str) -> None:
+	"""Append a blank row (visual separator) to the CSV log.
+
+	Args:
+		path: CSV file path.
+	"""
 	ensure_log_file(path)
 	with open(path, "a", newline="", encoding="utf-8") as handle:
 		writer = csv.writer(handle)
 		writer.writerow([])
-

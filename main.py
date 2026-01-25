@@ -1,5 +1,12 @@
+"""Snake task entry point.
+
+Runs the PsychoPy window, shows instruction/stage screens, and logs results.
+"""
+
 import os
 from datetime import datetime
+
+from typing import Any
 
 from psychopy import core, gui, visual
 
@@ -10,18 +17,20 @@ from snake_task.stages import STAGES
 from snake_task.ui import show_instructions, show_stage_screen
 
 
-def main():
+
+def main() -> None:
+	"""Run the Snake task."""
 	now = datetime.now()
 	hour_12 = now.hour % 12 or 12
 	session_datetime = f"{now.month}/{now.day}/{now.year}  {hour_12}:{now:%M:%S} {now:%p}"
-	info = {
+	info: dict[str, str] = {
 		"Participant ID": "",
 	}
 	dialog = gui.DlgFromDict(info, title="Snake")
 	if not dialog.OK:
 		return
 
-	participant_id = info["Participant ID"].strip() or "unknown"
+	participant_id: str = info["Participant ID"].strip() or "unknown"
 
 	win = visual.Window(color=BACKGROUND_COLOR, units="pix", fullscr=True)
 
@@ -38,8 +47,9 @@ def main():
 		status, result = run_stage(win, stage)
 		if status == "quit":
 			break
+		assert result is not None
 
-		row = {
+		row: dict[str, Any] = {
 			"participant_id": participant_id,
 			"session_datetime": session_datetime,
 			"difficulty": stage.name,
@@ -62,4 +72,3 @@ def main():
 
 if __name__ == "__main__":
 	main()
-
