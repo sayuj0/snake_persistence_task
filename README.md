@@ -2,6 +2,8 @@
 
 This PsychoPy-based Snake task is designed to assess behavioral persistence in relation to Coping Self-Efficacy (CSE). The task provides clear, interpretable feedback so persistence can be measured consistently across participants.
 
+![Snake task screenshot](images/snakegame.png)
+
 ## Run (PsychoPy)
 1. Keep the folder structure intact (do **not** move `main.py` out of the project folder).
 2. Open PsychoPy (Coder).
@@ -62,3 +64,6 @@ Edit `config.py`.
 - `PRE_STAGE_FIXATION_FLASH_SEC`: flash rate
 - `PRE_STAGE_FIXATION_SIZE_PX`: bigger = larger `+`
 - `PRE_STAGE_FIXATION_THICKNESS_PX`: bigger = thicker/brighter-looking lines
+
+## Credits
+Snake model assets by Clear_code (CC0): https://opengameart.org/content/snake-game-assets
