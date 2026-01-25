@@ -5,16 +5,6 @@ from typing import Dict, Optional, Tuple
 from psychopy import visual
 
 
-_DIR_VECTORS = {
-	"up": (0, 1),
-	"down": (0, -1),
-	"left": (-1, 0),
-	"right": (1, 0),
-}
-
-_VECTOR_DIRS = {v: k for k, v in _DIR_VECTORS.items()}
-
-
 @dataclass
 class SpriteConfig:
 	use_sprites: bool

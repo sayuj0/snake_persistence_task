@@ -4,7 +4,6 @@ from psychopy import visual, event, core
 
 from config import (
 	EXIT_KEY,
-	HUD_HEIGHT,
 	HUD_PANEL_HEIGHT,
 	HUD_PANEL_IMAGE,
 	HUD_PANEL_WIDTH_REL,
@@ -122,7 +121,7 @@ def create_hud(win, hud_height):
 			# Nudge to avoid 1px seams at the edges on some displays.
 			if panel_w >= width:
 				panel_w = panel_w + 2
-			panel_h = float(HUD_PANEL_HEIGHT) if HUD_PANEL_HEIGHT else float(HUD_HEIGHT)
+			panel_h = float(HUD_PANEL_HEIGHT) if HUD_PANEL_HEIGHT else float(hud_height)
 			hud_panel = visual.ImageStim(
 				win,
 				image=panel_path,

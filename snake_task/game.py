@@ -112,6 +112,8 @@ def run_stage(win, stage):
 	)
 
 	if SHOW_PRE_STAGE_FIXATION and PRE_STAGE_FIXATION_TOTAL_SEC > 0:
+		flash_sec = float(PRE_STAGE_FIXATION_FLASH_SEC)
+		total_sec = float(PRE_STAGE_FIXATION_TOTAL_SEC)
 		fix_h = visual.Line(
 			win,
 			start=(-PRE_STAGE_FIXATION_SIZE_PX, 0),
@@ -129,15 +131,12 @@ def run_stage(win, stage):
 			lineWidth=float(PRE_STAGE_FIXATION_THICKNESS_PX),
 		)
 		pre_clock = core.Clock()
-		while pre_clock.getTime() < float(PRE_STAGE_FIXATION_TOTAL_SEC):
+		while pre_clock.getTime() < total_sec:
 			keys = event.getKeys()
 			if EXIT_KEY in keys:
 				return "quit", None
 			t = pre_clock.getTime()
-			if float(PRE_STAGE_FIXATION_FLASH_SEC) <= 0:
-				visible = True
-			else:
-				visible = int(t / float(PRE_STAGE_FIXATION_FLASH_SEC)) % 2 == 0
+			visible = True if flash_sec <= 0 else (int(t / flash_sec) % 2 == 0)
 			if visible:
 				fix_h.draw()
 				fix_v.draw()
