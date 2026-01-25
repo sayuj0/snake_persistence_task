@@ -10,9 +10,15 @@ class StageConfig:
 	no_hit_respawn_sec: float
 
 BACKGROUND_COLOR = "black"
-GRID_SIZE = 20
+GRID_SIZE = 24
 HUD_HEIGHT = 90
 HUD_LINE_COLOR = "white"
+
+USE_PLAY_AREA_BOX = True
+PLAY_AREA_CELLS_X = 54
+PLAY_AREA_CELLS_Y = 37
+PLAY_AREA_LINE_COLOR = "white"
+PLAY_AREA_LINE_WIDTH = 4
 
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 

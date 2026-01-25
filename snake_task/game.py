@@ -9,6 +9,10 @@ from config import (
 	GRID_SIZE,
 	HUD_HEIGHT,
 	HUD_LINE_COLOR,
+	PLAY_AREA_CELLS_X,
+	PLAY_AREA_CELLS_Y,
+	PLAY_AREA_LINE_COLOR,
+	PLAY_AREA_LINE_WIDTH,
 	PRE_STAGE_FIXATION_COLOR,
 	PRE_STAGE_FIXATION_FLASH_SEC,
 	PRE_STAGE_FIXATION_OPACITY,
@@ -18,6 +22,7 @@ from config import (
 	SCORE_COLLISION,
 	SCORE_HIT,
 	SHOW_PRE_STAGE_FIXATION,
+	USE_PLAY_AREA_BOX,
 	START_LENGTH,
 	SPRITE_APPLE,
 	SPRITE_BODY_CORNER,
@@ -40,10 +45,27 @@ from snake_task.sprites import (
 
 def run_stage(win, stage):
 	width, height = win.size
-	min_x = -width // 2 + GRID_SIZE // 2
-	max_x = width // 2 - GRID_SIZE // 2
-	min_y = -height // 2 + HUD_HEIGHT + GRID_SIZE // 2
-	max_y = height // 2 - GRID_SIZE // 2
+	avail_min_x = -width / 2 + GRID_SIZE / 2
+	avail_max_x = width / 2 - GRID_SIZE / 2
+	avail_min_y = -height / 2 + HUD_HEIGHT + GRID_SIZE / 2
+	avail_max_y = height / 2 - GRID_SIZE / 2
+
+	if USE_PLAY_AREA_BOX:
+		# Fixed-size play area in grid cells (consistent across monitors)
+		max_play_w = max(GRID_SIZE * 6, width - GRID_SIZE)
+		max_play_h = max(GRID_SIZE * 6, (height - HUD_HEIGHT) - GRID_SIZE)
+		play_w = min(float(PLAY_AREA_CELLS_X) * GRID_SIZE, max_play_w)
+		play_h = min(float(PLAY_AREA_CELLS_Y) * GRID_SIZE, max_play_h)
+		center_y = (avail_min_y + avail_max_y) / 2
+		min_x = -play_w / 2 + GRID_SIZE / 2
+		max_x = play_w / 2 - GRID_SIZE / 2
+		min_y = center_y - play_h / 2 + GRID_SIZE / 2
+		max_y = center_y + play_h / 2 - GRID_SIZE / 2
+	else:
+		min_x = avail_min_x
+		max_x = avail_max_x
+		min_y = avail_min_y
+		max_y = avail_max_y
 
 	min_x = math.ceil(min_x / GRID_SIZE) * GRID_SIZE
 	max_x = math.floor(max_x / GRID_SIZE) * GRID_SIZE
@@ -51,9 +73,16 @@ def run_stage(win, stage):
 	max_y = math.floor(max_y / GRID_SIZE) * GRID_SIZE
 	bounds = (min_x, max_x, min_y, max_y)
 
-	snake = [(0, 0)]
+	# Choose a safe spawn point inside bounds.
+	spawn_y = math.floor(((min_y + max_y) / 2) / GRID_SIZE) * GRID_SIZE
+	spawn_y = min(max(spawn_y, min_y), max_y)
+	min_head_x = min_x + (START_LENGTH - 1) * GRID_SIZE
+	spawn_x = max(0, min_head_x)
+	spawn_x = min(spawn_x, max_x)
+
+	snake = [(spawn_x, spawn_y)]
 	for i in range(1, START_LENGTH):
-		snake.append((-i * GRID_SIZE, 0))
+		snake.append((spawn_x - i * GRID_SIZE, spawn_y))
 
 	direction = (GRID_SIZE, 0)
 	pending_direction = direction
@@ -71,9 +100,9 @@ def run_stage(win, stage):
 	target_pos = get_random_grid_position(bounds, GRID_SIZE, set(snake))
 
 	def reset_snake(length=START_LENGTH):
-		new_snake = [(0, 0)]
+		new_snake = [(spawn_x, spawn_y)]
 		for i in range(1, length):
-			new_snake.append((-i * GRID_SIZE, 0))
+			new_snake.append((spawn_x - i * GRID_SIZE, spawn_y))
 		return new_snake, (GRID_SIZE, 0)
 
 	snake_rect = visual.Rect(win, width=GRID_SIZE, height=GRID_SIZE, fillColor="green", lineColor="green")
@@ -110,6 +139,18 @@ def run_stage(win, stage):
 		lineColor=HUD_LINE_COLOR,
 		lineWidth=2,
 	)
+
+	wall_rect = None
+	if USE_PLAY_AREA_BOX:
+		wall_rect = visual.Rect(
+			win,
+			width=(max_x - min_x) + GRID_SIZE,
+			height=(max_y - min_y) + GRID_SIZE,
+			pos=((min_x + max_x) / 2, (min_y + max_y) / 2),
+			fillColor=None,
+			lineColor=PLAY_AREA_LINE_COLOR,
+			lineWidth=float(PLAY_AREA_LINE_WIDTH),
+		)
 
 	if SHOW_PRE_STAGE_FIXATION and PRE_STAGE_FIXATION_TOTAL_SEC > 0:
 		flash_sec = float(PRE_STAGE_FIXATION_FLASH_SEC)
@@ -196,6 +237,9 @@ def run_stage(win, stage):
 
 		update_hud(score_text, time_text, hit_text, score, now, target_hit)
 		update_progress_bar(bar_fill, now, stage.duration_sec, bar_bg.width)
+
+		if wall_rect is not None:
+			wall_rect.draw()
 
 		if hud_panel is None:
 			hud_line.draw()
