@@ -3,9 +3,7 @@
 import os
 from dataclasses import dataclass
 from typing import Dict, Optional, Sequence, Tuple
-
 from psychopy import visual
-
 
 @dataclass
 class SpriteConfig:
@@ -17,7 +15,6 @@ class SpriteConfig:
 	tail: Dict[str, str]
 	body_straight: Dict[str, str]
 	body_corner: Dict[str, str]
-
 
 class SpriteManager:
 	def __init__(self, win, config: SpriteConfig):
@@ -94,7 +91,6 @@ def _grid_dir_from_delta(dx: float, dy: float, grid_size: int) -> Optional[str]:
 		return "down"
 	return None
 
-
 def head_direction(snake: Sequence[Tuple[float, float]], grid_size: int) -> str:
 	"""Infer head direction from the head/neck segment.
 
@@ -113,7 +109,6 @@ def head_direction(snake: Sequence[Tuple[float, float]], grid_size: int) -> str:
 	dy = head_y - neck_y
 	return _grid_dir_from_delta(dx, dy, grid_size) or "right"
 
-
 def tail_direction(snake: Sequence[Tuple[float, float]], grid_size: int) -> str:
 	"""Infer tail direction from the tail and the segment before it.
 
@@ -131,7 +126,6 @@ def tail_direction(snake: Sequence[Tuple[float, float]], grid_size: int) -> str:
 	dx = tail_x - pre_x
 	dy = tail_y - pre_y
 	return _grid_dir_from_delta(dx, dy, grid_size) or "left"
-
 
 def body_sprite_key(
 	prev_pos: Tuple[float, float],

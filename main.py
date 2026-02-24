@@ -5,34 +5,32 @@ Runs the PsychoPy window, shows instruction/stage screens, and logs results.
 
 import os
 from datetime import datetime
-
 from typing import Any
-
 from psychopy import core, gui, visual
-
 from config import BACKGROUND_COLOR, RATE_DECIMALS
 from snake_task.game import run_stage
 from snake_task.logging import append_blank_row, append_log
-from snake_task.stages import STAGES
+from snake_task.stages import get_stages
 from snake_task.ui import show_end_screen, show_instructions, show_stage_screen
-
-
 
 def main() -> None:
 	"""Run the Snake task."""
 	now = datetime.now()
 	hour_12 = now.hour % 12 or 12
-	session_datetime = f"{now.month}/{now.day}/{now.year}  {hour_12}:{now:%M:%S} {now:%p}"
-	info: dict[str, str] = {
-		"Participant ID": "",
-	}
-	dialog = gui.DlgFromDict(info, title="Snake")
+	session_date = f"{now.month}/{now.day}/{now.year}"
+	session_time = f"{hour_12}:{now:%M:%S} {now:%p}"
+	dialog = gui.Dlg(title="Snake")
+	dialog.addField("Participant ID", "")
+	dialog.addField("Version", choices=["A", "B", "C", "D", "E", "F"])
+	data = dialog.show()
 	if not dialog.OK:
 		return
 
-	participant_id: str = info["Participant ID"].strip() or "unknown"
+	participant_id: str = str(data[0]).strip() or "unknown"
+	version: str = str(data[1]).strip().upper() or "A"
 
 	win = visual.Window(color=BACKGROUND_COLOR, units="pix", fullscr=True)
+	win.mouseVisible = False
 
 	if show_instructions(win) == "quit":
 		win.close()
@@ -42,7 +40,7 @@ def main() -> None:
 
 	completed_any = False
 	quit_requested = False
-	for stage in STAGES:
+	for stage in get_stages(version):
 		if show_stage_screen(win, stage.name) == "quit":
 			quit_requested = True
 			break
@@ -55,7 +53,9 @@ def main() -> None:
 
 		row: dict[str, Any] = {
 			"participant_id": participant_id,
-			"session_datetime": session_datetime,
+			"version": version,
+			"session_date": session_date,
+			"session_time": session_time,
 			"difficulty": stage.name,
 			"score_per_ms": (
 				f"{(result['score'] / denom_ms):.{RATE_DECIMALS}f}"

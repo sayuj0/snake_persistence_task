@@ -1,11 +1,8 @@
 """Core gameplay loop for each stage."""
 
 import math
-
 from typing import Any, Optional
-
 from psychopy import core, event, visual
-
 from config import (
 	APPLE_SCALE,
 	COLLISION_COOLDOWN_SEC,
@@ -48,8 +45,6 @@ from snake_task.sprites import (
 	head_direction,
 	tail_direction,
 )
-
-
 
 def run_stage(win: Any, stage: StageConfig) -> tuple[str, Optional[dict[str, Any]]]:
 	"""Run a single stage of gameplay.
@@ -118,6 +113,11 @@ def run_stage(win: Any, stage: StageConfig) -> tuple[str, Optional[dict[str, Any
 	target_pos = get_random_grid_position(bounds, GRID_SIZE, set(snake))
 
 	def reset_snake(length=START_LENGTH):
+		"""Return a new straight snake at the spawn position.
+
+		Args:
+			length: Number of segments for the reset snake.
+		"""
 		new_snake = [(spawn_x, spawn_y)]
 		for i in range(1, length):
 			new_snake.append((spawn_x - i * GRID_SIZE, spawn_y))
@@ -147,16 +147,20 @@ def run_stage(win: Any, stage: StageConfig) -> tuple[str, Optional[dict[str, Any
 		),
 	)
 
-	hud_panel, score_text, time_text, hit_text, bar_bg, bar_fill = create_hud(win, HUD_HEIGHT)
+	show_hud = bool(stage.show_hud)
+	hud_panel = score_text = time_text = hit_text = bar_bg = bar_fill = None
+	hud_line = None
+	if show_hud:
+		hud_panel, score_text, time_text, hit_text, bar_bg, bar_fill = create_hud(win, HUD_HEIGHT)
 
-	hud_boundary_y = min_y - GRID_SIZE / 2
-	hud_line = visual.Line(
-		win,
-		start=(min_x, hud_boundary_y),
-		end=(max_x, hud_boundary_y),
-		lineColor=HUD_LINE_COLOR,
-		lineWidth=2,
-	)
+		hud_boundary_y = min_y - GRID_SIZE / 2
+		hud_line = visual.Line(
+			win,
+			start=(min_x, hud_boundary_y),
+			end=(max_x, hud_boundary_y),
+			lineColor=HUD_LINE_COLOR,
+			lineWidth=2,
+		)
 
 	wall_rect = None
 	if USE_PLAY_AREA_BOX:
@@ -258,21 +262,34 @@ def run_stage(win: Any, stage: StageConfig) -> tuple[str, Optional[dict[str, Any
 			target_pos = get_random_grid_position(bounds, GRID_SIZE, set(snake))
 			last_spawn = now
 
-		update_hud(score_text, time_text, hit_text, score, now, target_hit)
-		update_progress_bar(bar_fill, now, stage.duration_sec, bar_bg.width)
+		if show_hud:
+			assert score_text is not None
+			assert time_text is not None
+			assert hit_text is not None
+			assert bar_bg is not None
+			assert bar_fill is not None
+			update_hud(score_text, time_text, hit_text, score, now, target_hit)
+			update_progress_bar(bar_fill, now, stage.duration_sec, bar_bg.width)
 
 		if wall_rect is not None:
 			wall_rect.draw()
 
-		if hud_panel is None:
-			hud_line.draw()
-		else:
-			hud_panel.draw()
-		bar_bg.draw()
-		bar_fill.draw()
-		score_text.draw()
-		time_text.draw()
-		hit_text.draw()
+		if show_hud:
+			assert bar_bg is not None
+			assert bar_fill is not None
+			assert score_text is not None
+			assert time_text is not None
+			assert hit_text is not None
+			if hud_panel is None:
+				assert hud_line is not None
+				hud_line.draw()
+			else:
+				hud_panel.draw()
+			bar_bg.draw()
+			bar_fill.draw()
+			score_text.draw()
+			time_text.draw()
+			hit_text.draw()
 
 		if not sprite_manager.draw(SPRITE_APPLE, target_pos, scale=APPLE_SCALE):
 			target_rect.pos = target_pos

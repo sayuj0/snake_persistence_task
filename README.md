@@ -19,7 +19,7 @@ Controls:
 Results are added to `data/snake_data.csv`.
 
 Fields include:
-- `participant_id`, `session_datetime`, `difficulty`
+- `participant_id`, `version`, `session_date`, `session_time`, `difficulty`
 - `snake_length`, `score`, `score_per_ms`, `hits_per_ms`, `collisions_per_ms`, `target_hit`, `collisions`
 
 ## Easy things to change

@@ -1,11 +1,8 @@
 """UI helpers (instructions, stage screens, HUD)."""
 
 import os
-
 from typing import Any, Optional
-
 from psychopy import visual, event, core
-
 from config import (
 	EXIT_KEY,
 	HUD_PANEL_HEIGHT,
@@ -17,14 +14,12 @@ from config import (
 	USE_HUD_PANEL,
 )
 
-
 DEFAULT_INSTRUCTIONS = (
 	"Use the arrow keys to move the snake.\n"
 	"Collect red targets to gain points.\n"
 	"Colliding with walls or yourself reduces points.\n\n"
 	"Your score updates in real time."
 )
-
 
 def _clean_instruction_text(text):
 	"""Remove duplicate header/footer lines from instruction text."""
@@ -41,8 +36,6 @@ def _clean_instruction_text(text):
 			continue
 		lines.append(raw_line)
 	return "\n".join(lines).strip()
-
-
 
 def show_instructions(win: Any, instruction_text: Optional[str] = None) -> str:
 	"""Show the instruction screen.
@@ -93,31 +86,36 @@ def show_instructions(win: Any, instruction_text: Optional[str] = None) -> str:
 		win.flip()
 		core.wait(0.01)
 
+def show_stage_screen(win: Any, title_text: str = "") -> str:
+	"""Show the pre-stage screen.
 
-
-def show_stage_screen(win: Any, title_text: str) -> str:
-	"""Show the stage title screen.
+	This hides stage names (e.g., Neutral/Positive labels) for the main stages,
+	but keeps the title visible for the Trial Run.
 
 	Args:
 		win: PsychoPy window used for drawing.
-		title_text: Title to display (e.g., stage name).
+		title_text: Stage name (may be shown for Trial Run).
 
 	Returns:
 		"continue" when the start key is pressed, or "quit" when the exit key is pressed.
 	"""
-	header = visual.TextStim(
-		win,
-		text=title_text,
-		height=36,
-		color="white",
-		pos=(0, 40),
-	)
-	footer = visual.TextStim(
+	show_title = "trial run" in (title_text or "").strip().lower()
+	header = None
+	if show_title:
+		header = visual.TextStim(
+			win,
+			text=title_text,
+			height=40,
+			color="white",
+			pos=(0, 120),
+		)
+
+	prompt = visual.TextStim(
 		win,
 		text=f"Press {INSTRUCTION_KEY.upper()} to start",
-		height=22,
+		height=48,
 		color="white",
-		pos=(0, -260),
+		pos=(0, 0),
 	)
 
 	while True:
@@ -126,11 +124,11 @@ def show_stage_screen(win: Any, title_text: str) -> str:
 			return "quit"
 		if INSTRUCTION_KEY in keys:
 			return "continue"
-		header.draw()
-		footer.draw()
+		if header is not None:
+			header.draw()
+		prompt.draw()
 		win.flip()
 		core.wait(0.01)
-
 
 def show_end_screen(win: Any, message: str) -> None:
 	"""Show an end-of-task message until the exit key is pressed.
@@ -149,8 +147,6 @@ def show_end_screen(win: Any, message: str) -> None:
 		pos=(0, 0),
 	)
 
-	# Show the screen and ensure we don't immediately exit due to buffered keys
-	# from the previous screen/stage.
 	text.draw()
 	win.flip()
 	core.wait(0.2)
@@ -162,8 +158,6 @@ def show_end_screen(win: Any, message: str) -> None:
 		text.draw()
 		win.flip()
 		core.wait(0.01)
-
-
 
 def create_hud(win: Any, hud_height: float):
 	"""Create HUD stimuli for a window.
@@ -242,8 +236,6 @@ def create_hud(win: Any, hud_height: float):
 	)
 	return hud_panel, score_text, time_text, hit_text, bar_bg, bar_fill
 
-
-
 def update_hud(score_text: Any, time_text: Any, hit_text: Any, score: float, elapsed: float, target_hit: int) -> None:
 	"""Update HUD text based on current state.
 
@@ -258,8 +250,6 @@ def update_hud(score_text: Any, time_text: Any, hit_text: Any, score: float, ela
 	score_text.text = f"Score: {score:.1f}"
 	time_text.text = f"Time: {elapsed:.1f}s"
 	hit_text.text = f"Targets: {target_hit}"
-
-
 
 def update_progress_bar(bar_fill: Any, elapsed: float, duration: float, bar_width: float = 760) -> None:
 	"""Update the progress bar fill based on elapsed time.

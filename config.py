@@ -6,13 +6,13 @@ Most experiment-tuning happens here.
 import os
 from dataclasses import dataclass
 
-
 @dataclass(frozen=True)
 class StageConfig:
 	name: str
 	duration_sec: float
 	speed_cells_per_sec: float
 	no_hit_respawn_sec: float
+	show_hud: bool = True
 
 BACKGROUND_COLOR = "black"
 GRID_SIZE = 24
