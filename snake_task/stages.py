@@ -7,7 +7,6 @@ from config import StageConfig
 
 STAGES: list[StageConfig]
 
-
 def _with_condition(stage: StageConfig, condition_label: str, show_hud: bool) -> StageConfig:
 	return StageConfig(
 		name=f"{stage.name} ({condition_label})",
@@ -16,7 +15,6 @@ def _with_condition(stage: StageConfig, condition_label: str, show_hud: bool) ->
 		no_hit_respawn_sec=stage.no_hit_respawn_sec,
 		show_hud=show_hud,
 	)
-
 
 def get_stages(version: str) -> list[StageConfig]:
 	"""Return the stage list for a given experimental version.
