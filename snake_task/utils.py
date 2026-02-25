@@ -1,9 +1,7 @@
 """Small utility helpers."""
 
 import random
-
 from typing import Iterable
-
 
 def get_random_grid_position(
 	bounds: tuple[float, float, float, float],

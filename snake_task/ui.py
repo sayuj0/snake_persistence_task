@@ -1,4 +1,4 @@
-"""UI helpers (instructions, stage screens, HUD)."""
+"""UI helpers: instructions, stage screens, end screen, and HUD."""
 
 import os
 from typing import Any, Optional

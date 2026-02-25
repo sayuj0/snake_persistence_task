@@ -1,6 +1,6 @@
 """Snake task entry point.
 
-Runs the PsychoPy window, shows instruction/stage screens, and logs results.
+Collects session info, runs PsychoPy stages, and logs results to CSV.
 """
 
 import os
