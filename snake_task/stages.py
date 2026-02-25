@@ -7,6 +7,16 @@ Neutral/Positive HUD visibility.
 from config import StageConfig
 
 def _with_condition(stage: StageConfig, condition_label: str, show_hud: bool) -> StageConfig:
+	"""Return a StageConfig labeled with `condition_label` and `show_hud`.
+
+	Args:
+		stage: Base StageConfig to copy.
+		condition_label: Label to append to the stage name (e.g., 'Neutral').
+		show_hud: Whether the HUD should be shown for this staged variant.
+
+	Returns:
+		A new `StageConfig` with the labeled name and `show_hud` setting.
+	"""
 	return StageConfig(
 		name=f"{stage.name} ({condition_label})",
 		duration_sec=stage.duration_sec,
@@ -16,7 +26,14 @@ def _with_condition(stage: StageConfig, condition_label: str, show_hud: bool) ->
 	)
 
 def get_stages(version: str) -> list[StageConfig]:
-	"""Return stage list for the given version (A–F)."""
+	"""Return stage list for the given version (A–F).
+
+	Args:
+		version: Version label.
+
+	Returns:
+		List of `StageConfig` entries for the selected version.
+	"""
 	version = (version or "").strip().upper()
 
 	trial = StageConfig(

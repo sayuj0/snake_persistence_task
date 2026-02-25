@@ -1,6 +1,6 @@
 """Snake task entry point.
 
-Collects session info, runs PsychoPy stages, and logs results to CSV.
+Runs the PsychoPy window, shows instruction/stage screens, and logs results.
 """
 
 import os
@@ -14,11 +14,12 @@ from snake_task.stages import get_stages
 from snake_task.ui import show_end_screen, show_instructions, show_stage_screen
 
 def main() -> None:
-	"""Run the Snake task."""
+	"""Run the Snake task: collect session info, run stages, and log results."""
 	now = datetime.now()
 	hour_12 = now.hour % 12 or 12
 	session_date = f"{now.month}/{now.day}/{now.year}"
 	session_time = f"{hour_12}:{now:%M:%S} {now:%p}"
+
 	dialog = gui.Dlg(title="Snake")
 	dialog.addField("Participant ID", "")
 	dialog.addField("Version", choices=["A", "B", "C", "D", "E", "F"])
@@ -88,7 +89,6 @@ def main() -> None:
 
 	win.close()
 	core.quit()
-
 
 if __name__ == "__main__":
 	main()

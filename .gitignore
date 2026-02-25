@@ -3,6 +3,16 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Python tooling caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
 # Virtual environments
 .venv/
 venv/
@@ -15,3 +25,12 @@ Thumbs.db
 
 # PsychoPy can generate caches/logs depending on setup
 .psychopy/
+
+# Experiment outputs (avoid committing participant data)
+data/*.csv
+data/*.tsv
+data/*.xlsx
+data/*.json
+data/*.log
+*.psydat
+*.log

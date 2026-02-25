@@ -24,6 +24,14 @@ class SpriteManager:
 		self._cache: Dict[str, visual.ImageStim] = {}
 
 	def _full_path(self, filename: str) -> str:
+		"""Return the full filesystem path for a sprite filename.
+
+		Args:
+			filename: Sprite filename relative to the `sprites_dir`.
+
+		Returns:
+			The absolute path to the sprite file as a string.
+		"""
 		return os.path.join(self._config.sprites_dir, filename)
 
 	def get(self, filename: str) -> Optional[visual.ImageStim]:
@@ -75,6 +83,12 @@ class SpriteManager:
 		return True
 
 def _grid_dir_from_delta(dx: float, dy: float, grid_size: int) -> Optional[str]:
+	"""Return grid-aligned direction.
+
+	Args: dx, dy (px), grid_size (px).
+
+	Returns: 'up'/'down'/'left'/'right' or None.
+	"""
 	if dx == grid_size and dy == 0:
 		return "right"
 	if dx == -grid_size and dy == 0:
