@@ -15,6 +15,17 @@ Controls:
 - `E`: start (instructions / stage screen)
 - `Esc`: quit
 
+## Versions and conditions (Neutral / Positive)
+At startup, the task asks for:
+- `participant_id`
+- `version` (A–F)
+
+Each version runs the same set of levels but in a different order. Stages are also labeled as:
+- **Neutral**: HUD hidden (no score/time/progress/targets panel)
+- **Positive**: HUD shown
+
+Note: Participants do not see the Neutral/Positive label on the pre-stage screen (except the “Trial Run” title), but the condition is still saved in the log via the stage name.
+
 ## What gets logged
 Results are added to `data/snake_data.csv`.
 
@@ -26,6 +37,8 @@ Fields include:
 
 ### Stages / timing
 Edit `snake_task/stages.py`.
+
+`get_stages(version)` defines the stage order for each version A–F. Neutral/Positive HUD visibility is set per stage in this file.
 
 Each stage is a `StageConfig(...)` with:
 - `name`: label written to the log

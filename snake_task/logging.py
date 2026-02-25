@@ -5,7 +5,6 @@ import os
 from typing import Any, Mapping, Optional
 from config import RATE_DECIMALS
 
-
 FIELDNAMES: list[str] = [
 	"participant_id",
 	"version",

@@ -10,11 +10,6 @@ class SpriteConfig:
 	use_sprites: bool
 	sprites_dir: str
 	grid_size: int
-	apple: str
-	head: Dict[str, str]
-	tail: Dict[str, str]
-	body_straight: Dict[str, str]
-	body_corner: Dict[str, str]
 
 class SpriteManager:
 	def __init__(self, win, config: SpriteConfig):
@@ -78,7 +73,6 @@ class SpriteManager:
 		stim.pos = pos
 		stim.draw()
 		return True
-
 
 def _grid_dir_from_delta(dx: float, dy: float, grid_size: int) -> Optional[str]:
 	if dx == grid_size and dy == 0:

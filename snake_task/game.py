@@ -139,11 +139,6 @@ def run_stage(win: Any, stage: StageConfig) -> tuple[str, Optional[dict[str, Any
 			use_sprites=USE_SPRITES,
 			sprites_dir=SPRITES_DIR,
 			grid_size=GRID_SIZE,
-			apple=SPRITE_APPLE,
-			head=SPRITE_HEAD,
-			tail=SPRITE_TAIL,
-			body_straight=SPRITE_BODY_STRAIGHT,
-			body_corner=SPRITE_BODY_CORNER,
 		),
 	)
 

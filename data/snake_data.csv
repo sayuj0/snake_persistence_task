@@ -1,0 +1,6 @@
+participant_id,version,session_date,session_time,difficulty,snake_length,score,score_per_ms,hits_per_ms,collisions_per_ms,target_hit,collisions
+unknown,A,2/24/2026,5:22:40 PM,Trial Run,5,0.0,0.0000000000,0.0000000000,0.0000000000,0,0
+
+xx,A,2/24/2026,5:28:30 PM,Trial Run,5,0.0,0.0000000000,0.0000000000,0.0000000000,0,0
+xx,A,2/24/2026,5:28:30 PM,Level 1 (Neutral),5,-2.5,-0.0005000000,0.0000000000,0.0002000000,0,1
+

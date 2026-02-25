@@ -6,8 +6,6 @@ Neutral/Positive HUD visibility.
 
 from config import StageConfig
 
-STAGES: list[StageConfig]
-
 def _with_condition(stage: StageConfig, condition_label: str, show_hud: bool) -> StageConfig:
 	return StageConfig(
 		name=f"{stage.name} ({condition_label})",
@@ -116,5 +114,3 @@ def get_stages(version: str) -> list[StageConfig]:
 		]
 
 	return base_stages
-
-STAGES = get_stages("A")
