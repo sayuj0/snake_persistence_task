@@ -1,6 +1,7 @@
 """Core gameplay loop for each stage."""
 
 import math
+import random
 from typing import Any, Optional
 from psychopy import core, event, visual
 from config import (
@@ -45,6 +46,61 @@ from snake_task.sprites import (
 	head_direction,
 	tail_direction,
 )
+
+
+POSITIVE_RESPAWN_DIALOGUE: tuple[str, ...] = (
+	"Keep going!",
+	"Keep it up!",
+	"You can do it!",
+	"Nice effort!",
+	"Good try!",
+	"You are doing great!",
+	"Stay confident!",
+	"Keep aiming high!",
+	"You can push through it!",
+	"Keep showing up!",
+	"Stay determined!",
+	"Give it another shot!",
+	"Keep moving forward!",
+	"You can do hard things!",
+	"Give it another try, you can do it!",
+	"Give it your next best try!",
+	"Push forward!",
+	"Stay resilient!",
+	"You are stronger each round!",
+	"Push ahead!",
+	"Try it again!",
+	"Power through!",
+	"Jump back in!",
+	"Give it another go!",
+	"Push past it!",
+	"You’re doing great, keep trying!",
+	"Bring your best again!",
+	"Push through the setback!",
+	"Stay strong!",
+	"Keep your focus!",
+	"Keep pushing!",
+	"Stay locked in!",
+	"Keep aiming higher!",
+	"Keep at it!",
+	"You got this!",
+	"You can bounce back!",
+	"Hone your focus!",
+	"Amazing effort!",
+	"That's okay, try again!",
+	"Don’t give up, keep going!",
+	"Keep persisting!",
+	"Continue progressing!",
+	"You are making progress!",
+	"Your effort is strong, keep it up!",
+	"Your persistence is valuable!",
+	"You are progressing well!",
+	"Great effort, keep it up!",
+	"You’re doing a great job!",
+	"You’re handling this very well!",
+)
+
+RESPAWN_DIALOGUE_DURATION_SEC = 1.5
 
 def run_stage(win: Any, stage: StageConfig) -> tuple[str, Optional[dict[str, Any]]]:
 	"""Run a single stage of gameplay.
@@ -142,6 +198,20 @@ def run_stage(win: Any, stage: StageConfig) -> tuple[str, Optional[dict[str, Any
 		),
 	)
 
+	positive_dialogue_enabled = "positive" in (stage.name or "").lower()
+	respawn_dialogue_until = -1.0
+	respawn_dialogue_text = None
+	if positive_dialogue_enabled:
+		respawn_dialogue_text = visual.TextStim(
+			win,
+			text="",
+			height=28,
+			color="white",
+			wrapWidth=(max_x - min_x) * 0.95,
+			alignText="center",
+			pos=(0, max_y - 60),
+		)
+
 	show_hud = bool(stage.show_hud)
 	hud_panel = score_text = time_text = hit_text = bar_bg = bar_fill = None
 	hud_line = None
@@ -236,6 +306,9 @@ def run_stage(win: Any, stage: StageConfig) -> tuple[str, Optional[dict[str, Any
 					snake, direction = reset_snake(new_length)
 					growth_remaining = 0
 					pending_direction = direction
+					if respawn_dialogue_text is not None and POSITIVE_RESPAWN_DIALOGUE:
+						respawn_dialogue_text.text = random.choice(POSITIVE_RESPAWN_DIALOGUE)
+						respawn_dialogue_until = now + RESPAWN_DIALOGUE_DURATION_SEC
 			else:
 				snake.insert(0, next_pos)
 				if next_pos == target_pos:
@@ -289,6 +362,9 @@ def run_stage(win: Any, stage: StageConfig) -> tuple[str, Optional[dict[str, Any
 		if not sprite_manager.draw(SPRITE_APPLE, target_pos, scale=APPLE_SCALE):
 			target_rect.pos = target_pos
 			target_rect.draw()
+
+		if respawn_dialogue_text is not None and now < respawn_dialogue_until:
+			respawn_dialogue_text.draw()
 
 		for idx, segment in enumerate(snake):
 			if idx == 0:
