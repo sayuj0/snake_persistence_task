@@ -24,6 +24,10 @@ Each version runs the same set of levels but in a different order. Stages are al
 - **Neutral**: HUD hidden (no score/time/progress/targets panel)
 - **Positive**: HUD shown
 
+Additional Positive-only feedback:
+- On collision, a randomized encouraging message appears in a speech-bubble near the snake.
+- The snake pauses briefly after a collision so the message can be read (currently 2 seconds).
+
 Note: Participants do not see the Neutral/Positive label on the pre-stage screen (except the “Trial Run” title), but the condition is still saved in the log via the stage name.
 
 ## What gets logged
