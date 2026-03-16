@@ -100,7 +100,12 @@ POSITIVE_RESPAWN_DIALOGUE: tuple[str, ...] = (
 	"You’re handling this very well!",
 )
 
-RESPAWN_DIALOGUE_DURATION_SEC = 1.5
+RESPAWN_DIALOGUE_DURATION_SEC = 2.0
+DEATH_PAUSE_SEC = 2.0
+
+
+def _clamp(value: float, lo: float, hi: float) -> float:
+	return max(lo, min(hi, value))
 
 def run_stage(win: Any, stage: StageConfig) -> tuple[str, Optional[dict[str, Any]]]:
 	"""Run a single stage of gameplay.
@@ -200,16 +205,42 @@ def run_stage(win: Any, stage: StageConfig) -> tuple[str, Optional[dict[str, Any
 
 	positive_dialogue_enabled = "positive" in (stage.name or "").lower()
 	respawn_dialogue_until = -1.0
+	death_pause_until = -1.0
 	respawn_dialogue_text = None
+	respawn_dialogue_bg = None
+	respawn_dialogue_tail = None
 	if positive_dialogue_enabled:
+		bubble_w = min(520, max(260, (max_x - min_x) * 0.55))
+		bubble_h = 84
+		respawn_dialogue_bg = visual.Rect(
+			win,
+			width=bubble_w,
+			height=bubble_h,
+			fillColor="white",
+			lineColor="black",
+			lineWidth=2,
+			opacity=0.95,
+			pos=(0, 0),
+		)
+		respawn_dialogue_tail = visual.ShapeStim(
+			win,
+			vertices=[(-18, 8), (18, 8), (0, -18)],
+			fillColor="white",
+			lineColor="black",
+			lineWidth=2,
+			opacity=0.95,
+			closeShape=True,
+			pos=(0, 0),
+		)
 		respawn_dialogue_text = visual.TextStim(
 			win,
 			text="",
-			height=28,
-			color="white",
-			wrapWidth=(max_x - min_x) * 0.95,
+			height=18,
+			color="black",
+			wrapWidth=bubble_w * 0.92,
 			alignText="center",
-			pos=(0, max_y - 60),
+			bold=True,
+			pos=(0, 0),
 		)
 
 	show_hud = bool(stage.show_hud)
@@ -289,7 +320,8 @@ def run_stage(win: Any, stage: StageConfig) -> tuple[str, Optional[dict[str, Any
 		elif "right" in keys and direction != (-GRID_SIZE, 0):
 			pending_direction = (GRID_SIZE, 0)
 
-		if now - last_move >= move_interval:
+		paused = now < death_pause_until
+		if (not paused) and (now - last_move >= move_interval):
 			direction = pending_direction
 			head_x, head_y = snake[0]
 			next_pos = (head_x + direction[0], head_y + direction[1])
@@ -306,6 +338,7 @@ def run_stage(win: Any, stage: StageConfig) -> tuple[str, Optional[dict[str, Any
 					snake, direction = reset_snake(new_length)
 					growth_remaining = 0
 					pending_direction = direction
+					death_pause_until = now + DEATH_PAUSE_SEC
 					if respawn_dialogue_text is not None and POSITIVE_RESPAWN_DIALOGUE:
 						respawn_dialogue_text.text = random.choice(POSITIVE_RESPAWN_DIALOGUE)
 						respawn_dialogue_until = now + RESPAWN_DIALOGUE_DURATION_SEC
@@ -326,7 +359,7 @@ def run_stage(win: Any, stage: StageConfig) -> tuple[str, Optional[dict[str, Any
 
 			last_move = now
 
-		if now - last_hit >= stage.no_hit_respawn_sec and now - last_spawn >= stage.no_hit_respawn_sec:
+		if (not paused) and now - last_hit >= stage.no_hit_respawn_sec and now - last_spawn >= stage.no_hit_respawn_sec:
 			target_pos = get_random_grid_position(bounds, GRID_SIZE, set(snake))
 			last_spawn = now
 
@@ -363,9 +396,6 @@ def run_stage(win: Any, stage: StageConfig) -> tuple[str, Optional[dict[str, Any
 			target_rect.pos = target_pos
 			target_rect.draw()
 
-		if respawn_dialogue_text is not None and now < respawn_dialogue_until:
-			respawn_dialogue_text.draw()
-
 		for idx, segment in enumerate(snake):
 			if idx == 0:
 				dir_key = head_direction(snake, GRID_SIZE)
@@ -385,6 +415,32 @@ def run_stage(win: Any, stage: StageConfig) -> tuple[str, Optional[dict[str, Any
 				if not (body_file and sprite_manager.draw(body_file, segment)):
 					snake_rect.pos = segment
 					snake_rect.draw()
+
+		if (
+			respawn_dialogue_text is not None
+			and respawn_dialogue_bg is not None
+			and respawn_dialogue_tail is not None
+			and now < respawn_dialogue_until
+			and snake
+		):
+			head_x, head_y = snake[0]
+			bubble_w = float(respawn_dialogue_bg.width)
+			bubble_h = float(respawn_dialogue_bg.height)
+			# Place bubble above the head; keep a readable gap so it doesn't overlap the snake.
+			# Tail triangle has a tip at y=-18 (relative), and we position it so the tip lands near the head.
+			tip_gap = GRID_SIZE * 0.8
+			bubble_x = _clamp(head_x, min_x + bubble_w / 2, max_x - bubble_w / 2)
+			desired_bubble_y = head_y + (bubble_h / 2) + 24 + tip_gap
+			bubble_y = _clamp(desired_bubble_y, min_y + bubble_h / 2, max_y - bubble_h / 2)
+
+			# Tail should point to the head, but stay attached under the bubble.
+			tail_x = _clamp(head_x, bubble_x - bubble_w / 2 + 28, bubble_x + bubble_w / 2 - 28)
+			respawn_dialogue_bg.pos = (bubble_x, bubble_y)
+			respawn_dialogue_text.pos = (bubble_x, bubble_y)
+			respawn_dialogue_tail.pos = (tail_x, bubble_y - bubble_h / 2 - 6)
+			respawn_dialogue_bg.draw()
+			respawn_dialogue_tail.draw()
+			respawn_dialogue_text.draw()
 
 		win.flip()
 		core.wait(0.005)
