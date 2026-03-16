@@ -103,9 +103,57 @@ POSITIVE_RESPAWN_DIALOGUE: tuple[str, ...] = (
 RESPAWN_DIALOGUE_DURATION_SEC = 2.0
 DEATH_PAUSE_SEC = 2.0
 
+DIALOGUE_MIN_WIDTH_PX = 180
+DIALOGUE_MAX_WIDTH_PX = 560
+DIALOGUE_MIN_HEIGHT_PX = 44
+DIALOGUE_MAX_HEIGHT_PX = 160
+DIALOGUE_PADDING_X_PX = 14
+DIALOGUE_PADDING_Y_PX = 10
+
 
 def _clamp(value: float, lo: float, hi: float) -> float:
 	return max(lo, min(hi, value))
+
+
+def _fit_dialogue_box(
+	bg: Any,
+	text: Any,
+	message: str,
+	max_width_px: float,
+) -> None:
+	"""Update dialogue text/wrapping and resize bg to fit (bounded)."""
+	text.text = message or ""
+
+	max_w = float(_clamp(max_width_px, DIALOGUE_MIN_WIDTH_PX, DIALOGUE_MAX_WIDTH_PX))
+	# Start with generous wrapping; then resize based on measured bounding box.
+	text.wrapWidth = max_w - (DIALOGUE_PADDING_X_PX * 2)
+
+	measured_w = None
+	measured_h = None
+	try:
+		bbox = getattr(text, "boundingBox", None)
+		if bbox and len(bbox) >= 2:
+			measured_w = float(bbox[0])
+			measured_h = float(bbox[1])
+	except Exception:
+		measured_w = None
+		measured_h = None
+
+	if measured_w is None or measured_h is None:
+		# Fallback heuristic if bounding box isn't available yet in this PsychoPy build.
+		chars = max(1, len(text.text))
+		measured_w = min(max_w, max(DIALOGUE_MIN_WIDTH_PX, chars * 9.0))
+		measured_h = 28.0 if chars < 30 else 52.0
+
+	desired_w = measured_w + (DIALOGUE_PADDING_X_PX * 2)
+	desired_h = measured_h + (DIALOGUE_PADDING_Y_PX * 2)
+
+	desired_w = float(_clamp(desired_w, DIALOGUE_MIN_WIDTH_PX, max_w))
+	desired_h = float(_clamp(desired_h, DIALOGUE_MIN_HEIGHT_PX, DIALOGUE_MAX_HEIGHT_PX))
+
+	bg.width = desired_w
+	bg.height = desired_h
+	text.wrapWidth = desired_w - (DIALOGUE_PADDING_X_PX * 2)
 
 def run_stage(win: Any, stage: StageConfig) -> tuple[str, Optional[dict[str, Any]]]:
 	"""Run a single stage of gameplay.
@@ -210,12 +258,10 @@ def run_stage(win: Any, stage: StageConfig) -> tuple[str, Optional[dict[str, Any
 	respawn_dialogue_bg = None
 	respawn_dialogue_tail = None
 	if positive_dialogue_enabled:
-		bubble_w = min(520, max(260, (max_x - min_x) * 0.55))
-		bubble_h = 84
 		respawn_dialogue_bg = visual.Rect(
 			win,
-			width=bubble_w,
-			height=bubble_h,
+			width=DIALOGUE_MIN_WIDTH_PX,
+			height=DIALOGUE_MIN_HEIGHT_PX,
 			fillColor="white",
 			lineColor="black",
 			lineWidth=2,
@@ -237,7 +283,7 @@ def run_stage(win: Any, stage: StageConfig) -> tuple[str, Optional[dict[str, Any
 			text="",
 			height=18,
 			color="black",
-			wrapWidth=bubble_w * 0.92,
+			wrapWidth=DIALOGUE_MIN_WIDTH_PX - (DIALOGUE_PADDING_X_PX * 2),
 			alignText="center",
 			bold=True,
 			pos=(0, 0),
@@ -340,7 +386,10 @@ def run_stage(win: Any, stage: StageConfig) -> tuple[str, Optional[dict[str, Any
 					pending_direction = direction
 					death_pause_until = now + DEATH_PAUSE_SEC
 					if respawn_dialogue_text is not None and POSITIVE_RESPAWN_DIALOGUE:
-						respawn_dialogue_text.text = random.choice(POSITIVE_RESPAWN_DIALOGUE)
+						message = random.choice(POSITIVE_RESPAWN_DIALOGUE)
+						assert respawn_dialogue_bg is not None
+						max_w = min(float(DIALOGUE_MAX_WIDTH_PX), float(max_x - min_x) * 0.85)
+						_fit_dialogue_box(respawn_dialogue_bg, respawn_dialogue_text, message, max_width_px=max_w)
 						respawn_dialogue_until = now + RESPAWN_DIALOGUE_DURATION_SEC
 			else:
 				snake.insert(0, next_pos)

@@ -60,7 +60,7 @@ def get_stages(version: str) -> list[StageConfig]:
 
 	level_3 = StageConfig(
 		name="Level 3",
-		duration_sec=10.0,
+		duration_sec=100.0,
 		speed_cells_per_sec=45.0,
 		no_hit_respawn_sec=45.0,
 	)
