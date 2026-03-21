@@ -37,6 +37,26 @@ Fields include:
 - `participant_id`, `version`, `session_date`, `session_time`, `difficulty`
 - `snake_length`, `score`, `score_per_ms`, `hits_per_ms`, `collisions_per_ms`, `target_hit`, `collisions`
 
+## LSL markers (psychophysiology)
+The task publishes event markers over Lab Streaming Layer (LSL) so physiological data (ECG/GSR/EEG) can be aligned to gameplay events.
+
+Stream details:
+- Name: `SnakeMarkers`
+- Type: `Markers`
+- 1 channel (string labels)
+
+Marker labels emitted:
+- Movement: `keypress_up`, `keypress_down`, `keypress_left`, `keypress_right`
+- Reward: `apple_eaten`
+- Growth: `snake_growth`
+- Collisions: `collision_wall`, `collision_self`
+- Feedback (Positive only): `feedback_<message_slug>`
+- Stage lifecycle: `stage_start_<stage_slug>`, `stage_complete_<stage_slug>`, `stage_quit_<stage_slug>`
+
+Notes:
+- Markers are pushed from inside the stage game loop; failures to push markers will not crash the task.
+- For code-only testing, `snake_task/game.py` includes `DEBUG_PRINT_MARKERS` which prints each marker label to the console.
+
 ## Easy things to change
 
 ### Stages / timing
