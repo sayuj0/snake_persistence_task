@@ -13,6 +13,12 @@ from snake_task.logging import append_blank_row, append_log
 from snake_task.stages import get_stages
 from snake_task.ui import show_end_screen, show_instructions, show_stage_screen
 
+try:
+	from pylsl import StreamInfo, StreamOutlet
+except Exception:  
+	StreamInfo = None  
+	StreamOutlet = None  
+
 def main() -> None:
 	"""Run the Snake task: collect session info, run stages, and log results."""
 	now = datetime.now()
@@ -33,6 +39,11 @@ def main() -> None:
 	win = visual.Window(color=BACKGROUND_COLOR, units="pix", fullscr=True)
 	win.mouseVisible = False
 
+	outlet = None
+	if StreamInfo is not None and StreamOutlet is not None:
+		info = StreamInfo("SnakeMarkers", "Markers", 1, 0, "string", "snake_task_v1")
+		outlet = StreamOutlet(info)
+
 	if show_instructions(win) == "quit":
 		win.close()
 		return
@@ -45,7 +56,7 @@ def main() -> None:
 		if show_stage_screen(win, stage.name) == "quit":
 			quit_requested = True
 			break
-		status, result = run_stage(win, stage)
+		status, result = run_stage(win, stage, outlet)
 		if status == "quit":
 			quit_requested = True
 			break

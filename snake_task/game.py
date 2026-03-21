@@ -2,6 +2,7 @@
 
 import math
 import random
+import re
 from typing import Any, Optional
 from psychopy import core, event, visual
 from config import (
@@ -103,6 +104,10 @@ POSITIVE_RESPAWN_DIALOGUE: tuple[str, ...] = (
 RESPAWN_DIALOGUE_DURATION_SEC = 2.0
 DEATH_PAUSE_SEC = 2.0
 
+# Debug aid: prints every marker label to the console.
+# Turn this off when you no longer need verbose marker output.
+DEBUG_PRINT_MARKERS = False
+
 DIALOGUE_MIN_WIDTH_PX = 180
 DIALOGUE_MAX_WIDTH_PX = 560
 DIALOGUE_MIN_HEIGHT_PX = 44
@@ -115,6 +120,30 @@ def _clamp(value: float, lo: float, hi: float) -> float:
 	return max(lo, min(hi, value))
 
 
+def _marker_slug(text: str) -> str:
+	"""Convert arbitrary text into a stable, analysis-friendly marker token."""
+	text = (text or "").strip().lower()
+	text = text.replace("’", "'")
+	text = re.sub(r"\s+", "_", text)
+	text = re.sub(r"[^a-z0-9_]+", "", text)
+	text = re.sub(r"_+", "_", text).strip("_")
+	return text or "na"
+
+
+def _push_marker(outlet: Any, label: str) -> None:
+	if DEBUG_PRINT_MARKERS:
+		try:
+			print(f"[SnakeMarkers] {label}")
+		except Exception:
+			pass
+	if outlet is None:
+		return
+	try:
+		outlet.push_sample([label])
+	except Exception:
+		return
+
+
 def _fit_dialogue_box(
 	bg: Any,
 	text: Any,
@@ -125,7 +154,6 @@ def _fit_dialogue_box(
 	text.text = message or ""
 
 	max_w = float(_clamp(max_width_px, DIALOGUE_MIN_WIDTH_PX, DIALOGUE_MAX_WIDTH_PX))
-	# Start with generous wrapping; then resize based on measured bounding box.
 	text.wrapWidth = max_w - (DIALOGUE_PADDING_X_PX * 2)
 
 	measured_w = None
@@ -140,7 +168,6 @@ def _fit_dialogue_box(
 		measured_h = None
 
 	if measured_w is None or measured_h is None:
-		# Fallback heuristic if bounding box isn't available yet in this PsychoPy build.
 		chars = max(1, len(text.text))
 		measured_w = min(max_w, max(DIALOGUE_MIN_WIDTH_PX, chars * 9.0))
 		measured_h = 28.0 if chars < 30 else 52.0
@@ -155,7 +182,7 @@ def _fit_dialogue_box(
 	bg.height = desired_h
 	text.wrapWidth = desired_w - (DIALOGUE_PADDING_X_PX * 2)
 
-def run_stage(win: Any, stage: StageConfig) -> tuple[str, Optional[dict[str, Any]]]:
+def run_stage(win: Any, stage: StageConfig, outlet: Any = None) -> tuple[str, Optional[dict[str, Any]]]:
 	"""Run a single stage of gameplay.
 
 	Args:
@@ -349,12 +376,17 @@ def run_stage(win: Any, stage: StageConfig) -> tuple[str, Optional[dict[str, Any
 			core.wait(0.005)
 
 	clock = core.Clock()
+	_push_marker(outlet, f"stage_start_{_marker_slug(stage.name)}")
 
 	while clock.getTime() < stage.duration_sec:
 		now = clock.getTime()
 
 		keys = event.getKeys()
+		for key in keys:
+			if key in ("up", "down", "left", "right"):
+				_push_marker(outlet, f"keypress_{key}")
 		if EXIT_KEY in keys:
+			_push_marker(outlet, f"stage_quit_{_marker_slug(stage.name)}")
 			return "quit", None
 
 		if "up" in keys and direction != (0, -GRID_SIZE):
@@ -380,6 +412,7 @@ def run_stage(win: Any, stage: StageConfig) -> tuple[str, Optional[dict[str, Any
 					collisions += 1
 					score += SCORE_COLLISION
 					collision_lockout = now + COLLISION_COOLDOWN_SEC
+					_push_marker(outlet, "collision_wall" if wall_collision else "collision_self")
 					new_length = max(START_LENGTH, len(snake) - int(LENGTH_LOSS_ON_COLLISION))
 					snake, direction = reset_snake(new_length)
 					growth_remaining = 0
@@ -390,13 +423,16 @@ def run_stage(win: Any, stage: StageConfig) -> tuple[str, Optional[dict[str, Any
 						assert respawn_dialogue_bg is not None
 						max_w = min(float(DIALOGUE_MAX_WIDTH_PX), float(max_x - min_x) * 0.85)
 						_fit_dialogue_box(respawn_dialogue_bg, respawn_dialogue_text, message, max_width_px=max_w)
+						_push_marker(outlet, f"feedback_{_marker_slug(message)[:80]}")
 						respawn_dialogue_until = now + RESPAWN_DIALOGUE_DURATION_SEC
 			else:
 				snake.insert(0, next_pos)
 				if next_pos == target_pos:
+					_push_marker(outlet, "apple_eaten")
 					score += SCORE_HIT
 					target_hit += 1
 					growth_remaining += max(0, int(LENGTH_GAIN_PER_TARGET) - 1)
+					_push_marker(outlet, "snake_growth")
 					last_hit = now
 					target_pos = get_random_grid_position(bounds, GRID_SIZE, set(snake))
 					last_spawn = now
@@ -475,14 +511,11 @@ def run_stage(win: Any, stage: StageConfig) -> tuple[str, Optional[dict[str, Any
 			head_x, head_y = snake[0]
 			bubble_w = float(respawn_dialogue_bg.width)
 			bubble_h = float(respawn_dialogue_bg.height)
-			# Place bubble above the head; keep a readable gap so it doesn't overlap the snake.
-			# Tail triangle has a tip at y=-18 (relative), and we position it so the tip lands near the head.
 			tip_gap = GRID_SIZE * 0.8
 			bubble_x = _clamp(head_x, min_x + bubble_w / 2, max_x - bubble_w / 2)
 			desired_bubble_y = head_y + (bubble_h / 2) + 24 + tip_gap
 			bubble_y = _clamp(desired_bubble_y, min_y + bubble_h / 2, max_y - bubble_h / 2)
 
-			# Tail should point to the head, but stay attached under the bubble.
 			tail_x = _clamp(head_x, bubble_x - bubble_w / 2 + 28, bubble_x + bubble_w / 2 - 28)
 			respawn_dialogue_bg.pos = (bubble_x, bubble_y)
 			respawn_dialogue_text.pos = (bubble_x, bubble_y)
@@ -500,4 +533,5 @@ def run_stage(win: Any, stage: StageConfig) -> tuple[str, Optional[dict[str, Any
 		"target_hit": target_hit,
 		"collisions": collisions,
 	}
+	_push_marker(outlet, f"stage_complete_{_marker_slug(stage.name)}")
 	return "complete", result
