@@ -1,6 +1,6 @@
 # Snake Persistence Task
 
-This PsychoPy-based Snake task is designed to assess behavioral persistence in relation to Coping Self-Efficacy (CSE). The task provides clear, interpretable feedback so persistence can be measured consistently across participants.
+A PsychoPy-based Snake behavioral task developed in Python to assess behavioral persistence in relation to coping self-efficacy, with synchronized event logging for physiological data collection.
 
 ![Snake task screenshot](images/snakegame.png)
 
